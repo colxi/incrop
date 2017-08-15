@@ -1,0 +1,7 @@
+{
+	// DB connection config
+	"db_host" 			: "localhost",
+	"db_user" 			: "root",
+	"db_pwd" 			: "root",
+	"db_name"			: "enefty"
+}
