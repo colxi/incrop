@@ -1,16 +1,17 @@
-var cron  						= require('node-cron'); 	// Scheduler
+var cjson   = require('cjson'); 		// Read commented json files
 
-var app_module_config_default 	= require('./app_modules/app-config-default.js');
-var app_module_exit 			= require('./app_modules/app-exit.js');
-var app_module_time 			= require('./app_modules/app-time.js');
-var app_module_log 				= require('./app_modules/app-log.js');
-var app_module_board 			= require('./app_modules/app-board.js');
-var app_module_crop 			= require('./app_modules/app-crop.js');
-var app_module_db 				= require('./app_modules/app-db.js');
+const app_module_config_default = require('./app_modules/app-config-default.js');
+const app_module_exit 			= require('./app_modules/app-exit.js');
+const app_module_time 			= require('./app_modules/app-time.js');
+const app_module_log 			= require('./app_modules/app-log.js');
+const app_module_board 			= require('./app_modules/app-board.js');
+const app_module_crop 			= require('./app_modules/app-crop.js');
+const app_module_db 			= require('./app_modules/app-db.js');
+const app_module_events 		= require('./app_modules/app-events.js');
+const app_day_cycle 			= require('./app_modules/app-day-cycle.js');
 
 
-
-var app 	= {
+const app 	= {
 	exit 	: app_module_exit,
 	config 	: app_module_config_default,
 	/* */
@@ -18,6 +19,9 @@ var app 	= {
 	Time 	: app_module_time,
 	Crop 	: app_module_crop,
 	Db 		: app_module_db,
+	DayCycle: app_day_cycle,
+	Event 	: app_module_events,
+	on 		: app_module_events.addListener,
 
 	UID 	: function() {
 		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -89,6 +93,9 @@ var app 	= {
 
 		app.log('app.init() : Arduino Board Ready! (response time='+lag+'ms)');
 
+		app.log('app.init() : Loading app-config-board.json...');
+		app.Components = cjson.load('app-config-board.json');
+
 		// connect to db
 		app.log('app.init() : Connecting to database...');
 		app.Db.createConnection({
@@ -107,6 +114,7 @@ var app 	= {
 		app.Status.initiated = true;
 		app.log('app.init() : App initiated! ');
 		app.log('*************************************************************');
+		// Get crop information and current day CROP PLAN
 		app.log('app.init() : App initiated! Getting CROP information...');
 		app.Crop.id 		= app.config.crop_id;
 		let crop 			= ( await app.Db.query('SELECT * from crops WHERE id=' + app.Crop.id) )[0];
@@ -123,11 +131,18 @@ var app 	= {
 
 		// TO DO : check if current crop is active, and if not reached last day!
 		// if active initiate scheduling
+		//
+		//
+
+		// INITIALIZE DAY CYCLE clock & events
+		await app.DayCycle.init();
+
+
+
 		app.initComponents();
 		return true;
 	},
 	Lights : {
-		status : false,
 		_items : [
 			{
 				id : 0,
@@ -135,6 +150,10 @@ var app 	= {
 				pin : 12
 			}
 		],
+		init : async function(){
+			const lights = await app.Db.query('SELECT * from crop_lights WHERE crop=' + app.Crop.id );
+			console.log(lights);
+		},
 		on : async function(id){
 			if(typeof id === 'undefined'){
 				for(let i=0; i<app.Lights._items.length; i++){
@@ -152,37 +171,13 @@ var app 	= {
 
 		}
 	},
-	programLightEvent: async function(action){
-		// TODO : DETECT EVENTS OVERLAPPING
-		// eg: DAY_START+SUNRISE
-		// eg: SUNRISE+SUNSET (when daylight=0)
-		// eg: DAY_START+SUNRISE+SUNSET (when daylight=0)
-		// eg : ¿more?
-		// should process the LAST one, and notify all them
-		console.log( action, new Date() );
-		let today = await app.Crop.getCropCalendar('today');
-		let now = new Date();
-		console.log(today);
-		if(now < today.sunrise){
-			console.log('IS NIGHTTIME. Next event is SUNRISE : '+ today.sunrise);
-			setTimeout( ()=> app.programLightEvent('EVENT:SUNRISE!'),  today.sunrise - now );
-		}else if(now < today.sunset){
-			console.log('IS DAYTIME. Next event is SUNSET : '+ today.sunset);
-			setTimeout( ()=> app.programLightEvent('EVENT:SUNSET!'), today.sunset - now );
-		}else if(now < today.dayEnd){
-			console.log('IS NIGHTTIME. Next event is DAY_END/DAY_START : '+ today.dayEnd);
-			let tomorrow = await app.Crop.getCropCalendar('tomorrow');
-			setTimeout( ()=> app.programLightEvent('EVENT:DAY_START!'), tomorrow.dayStart - now );
-		}
-		return;
-	},
+
 	initComponents : async function(){
 		// SET LIGHT 1
 		await app.Board.Pin( app.Lights._items[0].pin ).mode('OUTPUT');
 
 
 
-		app.programLightEvent('FIRST CHECK');
 
 		return;
 

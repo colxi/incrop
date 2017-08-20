@@ -1,0 +1,22 @@
+{
+	"relay_1" : {
+		"pin"  : 8,
+		"name" : "Relay 1",
+		"type" : "relay"
+	},
+	"relay_2" : {
+		"pin"  : 9,
+		"name" : "Relay 2",
+		"type" : "relay"
+	},
+	"relay_3" : {
+		"pin"  : 10,
+		"name" : "Relay 3",
+		"type" : "relay"
+	},
+	"relay_4" : {
+		"pin"  : 11,
+		"name" : "Relay 4",
+		"type" : "relay"
+	}
+}

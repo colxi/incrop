@@ -33,7 +33,8 @@ module.exports = {
 			// To minimize that gap, {dayEnd} value is augmented by 999
 			// milliseconds (instead of 1 second, to prevent the overlaping
 			// with the {dayStart} date of the following day)
-			if( date >= calendar[d].dayStart && date <= calendar[d].dayEnd.add(999).millisecond() ){
+			// ** PATCHED IN .getCropCalendar() !!!
+			if( date >= calendar[d].dayStart && date <= calendar[d].dayEnd /* .add(999).millisecond() */ ){
 				d = d + modifier;
 				if(d<0 || d>=calendar.length) break;
 				else return d;
@@ -73,7 +74,7 @@ module.exports = {
 		for(let d=0 ; d<cropPlan.length-1 ; d++){
 			let _start;
 			if( d===0 ) _start = app.Crop.date_start.at( cropPlan[d].day_start );
-			else _start = new Date( +calendar[ d-1 ].dayEnd ).add( { seconds : 1 } );
+			else _start = new Date( +calendar[ d-1 ].dayEnd ).add( { milliseconds : 1 } );
 
 			// Light goes on on the Sunrise (use dayStart Date and asign sunrise hour )
 			let _sunrise = new Date( +_start ).at(cropPlan[d].sunrise);
@@ -85,7 +86,7 @@ module.exports = {
 			// Day ends, one second before the  next day starts
 			let _end =	new Date( +_sunset ).at( cropPlan[d+1].day_start );
 			if( _end < _sunset ) _end.add( { days : 1 } );
-			_end.add( { seconds : -1 } );
+			_end.add( { milliseconds : -1 } );
 
 			// get the length of the day in hours
 			let _length = Math.round(Math.abs(_start - _end) / 36e5);
@@ -117,4 +118,5 @@ module.exports = {
 			else return calendar[cropDay];
 		}
 	},
+
 };

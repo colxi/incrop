@@ -1,4 +1,4 @@
-/* globals app */
+/* globals app, OUTPUT, INPUT_PULLUP, INPUT, HIGH, LOW */
 
 /**
  *
@@ -65,7 +65,13 @@ var _COMPONENTS = {
 		// conf.mode NO|NC
 
 		//initialize
-		let pinmode = Board.Pin(conf.pin).mode(OUTPUT);
+		if(typeof conf === 'number'){
+			conf = {
+				pin 	: conf,
+				mode 	: 'NC'
+			};
+		}
+		Board.Pin(conf.pin).mode(OUTPUT);
 
 		return {
 			id 		: null,
@@ -502,7 +508,7 @@ var Board = {
 		 * @return {[type]}      [description]
 		 */
 		allowReadOutputPins : async function( rule=true ){
-			await Board.System.send( 'read_output_pins:'+ (rule ? '1' : '0') );
+			await Board.System.send( 'read_output_pins:'+ (rule ? HIGH : LOW) );
 			return true;
 		},
 	},
