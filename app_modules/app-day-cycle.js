@@ -46,6 +46,9 @@ const dayCycleScheduler = async function(){
 var emitDayCycleEvent = async function(event, cropDay){
 	switch(event){
 		case 'dayStart':
+			// check if the current day exists in the crop plan
+			let cropCalendar = await app.crop.getCropCalendar();
+			console.log('aaaaaaaaaaaa', cropCalendar);
 			NEXT_EVENT = 'daySunrise';
 			await app.Event.emit('dayStart',cropDay, EVENT_DAY_START);
 			//  Schedule the CURRENT NEW day cycle events

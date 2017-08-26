@@ -26,6 +26,10 @@ module.exports = {
 	log_console_history_length 			: 500,
 	log_unhandled_reject_details_silent : true,
 	log_silent_board_timeouts_reponses 	: false,
+	//
+	log_style_highlight_color 			: 'white',
+	log_style_event_color 				: 'green',
+
 	// DB config
 	db_host 							: 'localhost',
 	db_user 							: 'root',

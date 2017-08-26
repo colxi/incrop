@@ -20,6 +20,7 @@ const app 	= {
 	Crop 	: app_module_crop,
 	Db 		: app_module_db,
 	DayCycle: app_day_cycle,
+	Log 	: app_module_log,
 	Event 	: app_module_events,
 	on 		: app_module_events.addListener,
 
@@ -63,6 +64,8 @@ const app 	= {
 			throw new app.error('app.init() : Cancelled. App already initiated...');
 		}
 
+		app.Log.addStyle( {rule:/app.init\(\)/, style: 'color:' + app.config.log_style_highlight_color} );
+		app.Log.addStyle( {rule:/\[event:.*\]/, style: 'color:' + app.config.log_style_event_color} );
 		// Initiating App...
 		app.log('app.init() : Initiating app...');
 
@@ -114,20 +117,25 @@ const app 	= {
 		app.Status.initiated = true;
 		app.log('app.init() : App initiated! ');
 		app.log('*************************************************************');
-		// Get crop information and current day CROP PLAN
+		// Get  information about current CROP
 		app.log('app.init() : App initiated! Getting CROP information...');
 		app.Crop.id 		= app.config.crop_id;
 		let crop 			= ( await app.Db.query('SELECT * from crops WHERE id=' + app.Crop.id) )[0];
 		app.Crop.date_start = crop.date_start;
 		app.Crop.crop_plan 	= crop.crop_plan;
-		app.log('app.init() : Setting up Crop #'+app.config.crop_id+' started the day '+ app.Time.format(crop.date_start, 'date') );
-		let cropPlan = await app.Crop.getCropPlan();
-		let cropDay;
-		try{ cropDay = await app.Crop.getCropDay() }
-		catch(err){ console.warn(err) }
+		app.log('app.init() : Setting up Crop #'+app.config.crop_id+' with CROP PLAN ' + app.Crop.crop_plan);
+		// Get current CROP CALENDAR
+		let cropCalendar = await app.Crop.getCropCalendar();
+		app.log('app.init() : Crop started the day '+ app.Time.format(crop.date_start, 'date') + ' and ends the day ' + app.Time.format( cropCalendar[cropCalendar.length-1].dayEnd, 'datetime') );
+		// block if CROP HAS ENDED
+		if( new Date() > cropCalendar[cropCalendar.length-1].dayEnd ){
+			app.warn('app.init() : Current Crop HAS ALREADY FINISHED. NOTHING TO DO.');
+			return;
+		}
+		let cropDay = await app.Crop.getCropDay();
 
 		app.log('app.init() : Today is the '+cropDay+'th day since the crop started.');
-		app.log('app.init() : According to the "Crop Plan #'+crop.crop_plan+'", there are '+(cropPlan.length-cropDay)+' days remaining till the end.');
+		app.log('app.init() : According to the "Crop Plan #'+crop.crop_plan+'", there are '+(cropCalendar.length-cropDay)+' days remaining till the end.');
 
 		// TO DO : check if current crop is active, and if not reached last day!
 		// if active initiate scheduling
