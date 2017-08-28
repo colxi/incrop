@@ -1,4 +1,0 @@
-AuthType Basic
-AuthName "Password Protected Area"
-AuthUserFile /home/colxi/projects/incrop/manager/src/.htpasswd
-Require valid-user
