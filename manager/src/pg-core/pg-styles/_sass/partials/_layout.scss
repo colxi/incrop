@@ -1,0 +1,14 @@
+/* LAYOUT */
+
+.pg-nav {}
+
+.pg-header {}
+
+.pg-section-header,
+.pg-row.pg-section-header{
+    border-bottom: 1px solid $c-background-darker;
+    padding-bottom: $s-small;
+    margin-bottom: $s-biggest;
+    vertical-align: middle;
+    align-items: center;
+}

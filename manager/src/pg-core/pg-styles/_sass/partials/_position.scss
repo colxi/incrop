@@ -1,0 +1,17 @@
+/* POSITION */
+.pg-vertical-center{
+    vertical-align:middle;
+    align-items: center;
+    display:flex !important;
+}
+
+.pg-float-left{ float:left; }
+.pg-float-right{ float:right; }
+.pg-float-right, .pg-float-left{
+	content:"";
+	display:block;
+	clear:both;
+	position:relative;
+}
+.pg-float-none{ float:none; }
+.pg-float-clear{ clear:both; }

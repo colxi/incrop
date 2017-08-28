@@ -1,0 +1,93 @@
+$conf-reset-styles 		: true;
+
+/* FONTS & SIZES */
+@import 				'https://fonts.googleapis.com/css?family=Roboto:400,700';
+@import 				'https://fonts.googleapis.com/css?family=Roboto+Slab:400,700';
+
+$f-primary 				: 'Roboto' , Arial;
+$f-secondary 			: 'Roboto Slab' , Arial;
+
+$f-biggest 				: 20px;
+$f-bigger 				: 18px;
+$f-big 					: 16px;
+$f-size 				: 14px; // <--- Main size
+$f-small 				: 12px;
+$f-smaller 				: 10px;
+$f-smallest 			: 9px;
+
+/* COLORS : Palete */
+$c-text 	 			: #76767d;
+
+$c-brightest 			: #ffc540;
+$c-brighter 			: #ffa520;
+$c-bright 				: #ff7500;
+$c-main 				: #ff4500;  // <--- Main color
+$c-dark 				: #df3500;
+$c-darker 				: #bf2500;
+$c-darkest 				: #ab1000;
+
+$c-secondary-brighter 	: #8d8f8f;
+$c-secondary-bright 	: #7d7f8f;
+$c-secondary-main		: #6d6d7f; // <--- Main secondary color
+$c-secondary-dark 		: #3c3c44;
+$c-secondary-darker 	: #2c2c34;
+
+$c-background-brightest	: #ffffff;
+$c-background-brighter 	: #eeeeee;
+$c-background-bright 	: #eee0fc;
+$c-background 			: #e0e0fc; 	// <--- Main background
+$c-background-dark		: #d1d1e6;
+$c-background-darker	: #c1c1c6;
+$c-background-darkest	: #555555;
+
+/* COLORS: Status */
+$c-ok 					: #09709c;
+$c-ok-bright 			: #afc7ec;
+$c-error 				: #cd3347;
+$c-error-bright 		: #ecafb7;
+$c-warn 				: #F4B400;
+$c-warn-bright 			: #ebecaf;
+$c-info 				: #83b31b;
+$c-info-bright 			: #b6ecaf;
+
+
+/* COLORS: Grays */
+$c-gray-brigth   		: #9a9d9e;
+$c-gray 				: #6d8293;
+$c-gray-dark 			: #222;
+
+
+/* SIZING & SPACING */
+
+$s-biggest 				: 40px;
+$s-bigger 				: 25px;
+$s-big 					: 20px;
+$s-regular 				: 15px;   // <--- Default Spacing
+$s-small 				: 10px;
+$s-smaller 				: 5px;
+$s-smallest 			: 2px;
+
+
+/* BORDERS */
+
+$b-curve 				: 0px;
+
+
+
+/* FONT WEIGHTS */
+
+$f-bolder 				: 900;
+$f-bold 				: 600;
+$f-regular 				: 400;
+$f-light 				: 200;
+$f-lighter 				: 100;
+
+
+/* VELOCITIES */
+
+$v-faster				: 0.2s;
+$v-fast 				: 0.5s;
+$v-default 				: 1s;
+$v-slow 				: 0.5s;
+$v-slower 				: 0.5s;
+

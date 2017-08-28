@@ -1,0 +1,24 @@
+/* BUTTON */
+/* BUTTON */
+
+.pg-btn, button{
+    padding: $s-small $s-small;
+    background-color: $c-secondary-main;
+    color: $c-background-brighter;
+    font-size: $f-smaller;
+    cursor:pointer;
+    display: inline-block;
+    text-align: center;
+    text-transform: uppercase;
+    clear:both;
+    &:hover{
+    	background-color:$c-main;
+    	color: $c-background-brighter;
+    }
+}
+
+.pg-btn > .fa, button > .fa {
+    float: right;
+    margin-left: $s-small ;
+    margin-top: -1px;
+}

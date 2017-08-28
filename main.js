@@ -64,8 +64,10 @@ const app 	= {
 			throw new app.error('app.init() : Cancelled. App already initiated...');
 		}
 
+		// Setting console styles
 		app.Log.addStyle( {rule:/app.init\(\)/, style: 'color:' + app.config.log_style_highlight_color} );
 		app.Log.addStyle( {rule:/\[event:.*\]/, style: 'color:' + app.config.log_style_event_color} );
+
 		// Initiating App...
 		app.log('app.init() : Initiating app...');
 
@@ -132,17 +134,13 @@ const app 	= {
 			app.warn('app.init() : Current Crop HAS ALREADY FINISHED. NOTHING TO DO.');
 			return;
 		}
-		let cropDay = await app.Crop.getCropDay();
-
-		app.log('app.init() : Today is the '+cropDay+'th day since the crop started.');
-		app.log('app.init() : According to the "Crop Plan #'+crop.crop_plan+'", there are '+(cropCalendar.length-cropDay)+' days remaining till the end.');
-
-		// TO DO : check if current crop is active, and if not reached last day!
-		// if active initiate scheduling
-		//
-		//
+		app.Crop.crop_day = await app.Crop.getCropDay();
+		// output Calendar info...
+		app.log('app.init() : Today is the '+app.Crop.crop_day+'th day since the crop started.');
+		app.log('app.init() : According to the "Crop Plan #'+crop.crop_plan+'", there are '+(cropCalendar.length-app.Crop.crop_day)+' days remaining till the end.');
 
 		// INITIALIZE DAY CYCLE clock & events
+		app.log('app.init() : Initializing Day Cycles engine clock...');
 		await app.DayCycle.init();
 
 

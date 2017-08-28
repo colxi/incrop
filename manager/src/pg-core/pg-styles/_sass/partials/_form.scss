@@ -1,0 +1,228 @@
+/* FORM AND FORM CONTROLS */
+
+// placeholders
+
+::-webkit-input-placeholder { color: $c-background-dark; } /* Chrome/Opera/Safari */
+::-moz-placeholder { color: $c-background-dark; } /* Firefox 19+ */
+:-ms-input-placeholder {  color: $c-background-dark; } /* IE 10+ */
+:-moz-placeholder { color: $c-background-dark; }/* Firefox 18- */
+
+//
+// FORM STYLES
+//
+.pg-form-footer{
+    border-top: 1px solid $c-background-darker;;
+    padding-top: $s-small;
+    margin-top: $s-big;
+    text-align: right;
+    position: relative;
+    clear: both;
+    display: block;
+}
+
+.pg-form-control {
+    position: relative;
+    margin-bottom: $s-big;
+    clear:both;
+    display: block;
+    padding-top: $s-big;
+    width: 100%;
+}
+
+.pg-form-control *:focus {
+    outline: none;
+}
+
+.pg-form-control > input,
+.pg-form-control > select{
+    position: relative;
+    width: 100%;
+    border-radius: 15px;
+    padding: 8px 13px;
+    border-top:none;
+    border-left:none;
+    border-bottom: 1px solid #c3c2c2;
+    border-right: 1px solid #c3c2c2;
+    background-color: #f4f4ff;
+    color: $c-text;
+    height: 32px;
+}
+
+.pg-form-control > span {
+    display: block;
+    top: 2px;
+    position: absolute;
+    transition: all $v-fast ease;
+    font-size : $f-small;
+}
+
+.pg-form-control [required] + span:before {
+    content: "REQUIRED";
+    float: right;
+    border-radius: 0px;
+    color: black;
+    display: block;
+    position: relative;
+    right: -5px;
+    top: -2px;
+    text-align: center;
+    font-size: 8px;
+    padding: 3px;
+    border: 1px solid #6d6d7f;
+    font-weight: 100;
+    opacity: .5;
+    font-family: "lucida console";
+}
+
+
+.pg-form-control label>.pg-tag{
+    display: inline-block;
+    background-color: $c-secondary-main;
+    padding: $s-small $s-regular;
+    border-radius: 15px;
+    cursor: pointer;
+    min-width: 70px;
+    text-align: center;
+    color: #fff;
+    margin-top: 5px;
+    margin-right: 5px;
+    font-size:$f-small;
+    &:hover{
+        background-color:$c-main;
+    }
+}
+.pg-form-control label>.pg-tag.pg-checked{
+    background-color: $c-secondary-dark;
+    box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.3) inset;
+    border-left: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    color: #bdbdbd;
+}
+.pg-form-control label>label {
+    display: inline-block;
+}
+
+.pg-form-control *:invalid {
+    color: $c-error;
+}
+
+.pg-form-control *:invalid+span {
+    color: $c-error !important;
+    margin-left:15px;
+    &:after {
+        content: "!";
+        position: absolute;
+        background: $c-error;
+        color: $c-error-bright;
+        border-radius: 50%;
+        width: 13px;
+        height: 13px;
+        display: block;
+        top: -1px;
+        left: -15px;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 12px;
+        font-family: arial;
+    }
+}
+
+
+
+$input-range-height : 4px;
+$input-range-box-shadow : none;
+$input-range-border-top : 1px solid $c-secondary-bright;
+
+
+// NORMALIZE INPUT RANGE : Set invisible or unstyled range inputs in all browsers.
+input[type=range] {
+    -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+    width: 100%; /* Specific width is required for Firefox. */
+    background: transparent !important; /* Otherwise white in Chrome */
+    border: none !important;
+    padding:0 !important;
+    margin:0px !important;
+}
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; }
+input[type=range]::-ms-track {
+    width: 100%;
+    cursor: pointer;
+    /* Hides the slider so custom styles can be added */
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+
+@mixin common-input-range-slider-thumb {
+    border: none;
+    border-bottom: 1px solid #c3c2c2;
+    border-right: 1px solid #c3c2c2;
+    background-color: #f4f4ff;
+    height: 30px;
+    width: 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+
+/* Special styling for WebKit/Blink */
+.pg-form-control input[type=range]::-webkit-slider-thumb {
+    @include common-input-range-slider-thumb;
+    -webkit-appearance: none;
+    margin-top: -14px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+}
+
+/* All the same stuff for Firefox */
+.pg-form-control input[type=range]::-moz-range-thumb { @include common-input-range-slider-thumb; }
+
+/* All the same stuff for IE */
+.pg-form-control input[type=range]::-ms-thumb { @include common-input-range-slider-thumb; }
+
+
+
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: $input-range-height;
+  box-shadow: $input-range-box-shadow;
+  cursor: pointer;
+  background: $c-secondary-main;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track { background: $c-secondary-main; }
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: $input-range-height;
+  box-shadow: $input-range-box-shadow;
+  cursor: pointer;
+  background: $c-secondary-main;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: $input-range-height;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  border-width: 16px 0;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  box-shadow: $input-range-box-shadow;
+  background: $c-secondary-main;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+}
+input[type=range]:focus::-ms-fill-lower { background: $c-secondary-main; }
+input[type=range]::-ms-fill-upper {
+  box-shadow: $input-range-box-shadow;
+  background: $c-secondary-main;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+}
+input[type=range]:focus::-ms-fill-upper { background: $c-secondary-main; }

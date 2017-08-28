@@ -1,0 +1,120 @@
+
+/* COLUMNIZATION */
+/* based in specs from : https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Advanced_layouts_with_flexbox */
+
+.pg-row{
+    position            : relative;
+    margin-left         : 0px !important;
+    margin-right        : 0px !important;
+    // overflow            : hidden;
+    width               : 100%;
+
+	display             : -webkit-box !important;
+	display             : -moz-box !important;
+	display             : -ms-flexbox !important;
+	display             : -moz-flex !important;
+	display             : -webkit-flex !important;
+    display             : flex !important;
+
+    -webkit-flex-wrap   : nowrap;
+    -moz-flex-wrap      : nowrap;
+    -ms-flex-wrap       : none;
+    flex-wrap           : nowrap;
+
+	-webkit-box-align   : stretch;
+    -moz-box-align      : stretch;
+    -ms-flex-align      : stretch;
+    -moz-align-items    : stretch;
+    -ms-align-items     : stretch;
+    -webkit-align-items : stretch;
+    align-items         : stretch;
+
+    -webkit-box-direction   : normal;
+    -moz-box-direction      : normal;
+
+    -webkit-box-orient      : horizontal; /* responsive : vertical */
+    -moz-box-orient         : horizontal; /* responsive : vertical */
+
+	-webkit-flex-direction  : row; /* responsive : column */
+	-ms-flex-direction      : row; /* responsive : column */
+	flex-direction          : row; /* responsive : column */
+}
+.pg-row::after{
+    clear                   : both;
+    content                 : "";
+    display                 : block;
+}
+
+// COLUMN GUTTER
+.pg-row > [class^=pg-col]:first-child{ margin-left: 0px; }
+.pg-row > [class^=pg-col]{ margin-left: $s-small;  margin-right: $s-small; }
+.pg-row > [class^=pg-col]:last-child { margin-right: 0px; }
+
+.pg-row.pg-big-gap > [class^=pg-col]:first-child{ margin-left: 0px;  }
+.pg-row.pw-big-gap > [class^=pg-col]{ margin-left: $s-regular;  margin-right: $s-regular; }
+.pg-row.pg-big-gap > [class^=pg-col]:last-child{ margin-right: 0px;  }
+
+.pg-row.pg-small-gap > [class^=pg-col]:first-child{ margin-left: 0px; }
+.pg-row.pg-small-gap > [class^=pg-col]{ margin-left: $s-smaller;  margin-right: $s-smaller; }
+.pg-row.pg-small-gap > [class^=pg-col]:last-child{ margin-right: 0px; }
+
+.pg-row.pg-no-gap > [class^=pg-col]:first-child{ margin-left: 0px; }
+.pg-row.pg-no-gap > [class^=pg-col]{ margin-left: 0px;  margin-right: 0px; }
+.pg-row.pg-no-gap > [class^=pg-col]:last-child{ margin-right: 0px; }
+
+.pg-row > [class^=pg-col].pg-no-gap { margin-left: 0px;  margin-right: 0px; }
+
+.pg-row > [class^=pg-col]{
+    position                : relative;
+    display                 : block;
+    //overflow                : hidden;
+    transition              : width .5s ease-in-out;
+}
+
+.pg-row > [class^=pg-col]::after{
+    clear                   : both;
+    content                 : "";
+    display                 : block;
+}
+
+.pg-row > [class^=pg-col]:empty::before{
+    content                 : "\200B";
+    display                 : block;
+}
+
+.pg-row{
+    .pg-col-collapsed{ width    : 0px !important; opacity:0; }
+    .pg-col-5{ width: 5%; }
+    .pg-col-10{ width: 10%; }
+    .pg-col-15{ width: 15%; }
+    .pg-col-20{ width: 20%; }
+    .pg-col-25{ width: 25%; }
+    .pg-col-30{ width: 30%; }
+    .pg-col-33{ width: 33%; }
+    .pg-col-35{ width: 35%; }
+    .pg-col-40{ width: 40%; }
+    .pg-col-45{ width: 45%; }
+    .pg-col-50{ width: 50%; }
+    .pg-col-55{ width: 55%; }
+    .pg-col-60{ width: 60%; }
+    .pg-col-65{ width: 65%; }
+    .pg-col-70{ width: 70%; }
+    .pg-col-75{ width: 75%; }
+    .pg-col-80{ width: 80%; }
+    .pg-col-85{ width: 85%; }
+    .pg-col-90{ width: 90%; }
+    .pg-col-95{ width: 95%; }
+    .pg-col-100{ width: 100%; }
+
+    .pg-col{     flex-grow: 1; }
+    .pg-col-x1{  flex-grow: 1; }
+    .pg-col-x2{  flex-grow: 2; }
+    .pg-col-x3{  flex-grow: 3; }
+    .pg-col-x4{  flex-grow: 4; }
+    .pg-col-x5{  flex-grow: 5; }
+    .pg-col-x6{  flex-grow: 6; }
+    .pg-col-x7{  flex-grow: 7; }
+    .pg-col-x8{  flex-grow: 8; }
+    .pg-col-fixed{  flex-grow: 0; }
+}
+

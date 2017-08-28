@@ -17,7 +17,7 @@ var Log = {
 	 * [addStyle description]
 	 * @param {[type]} r [description]
 	 */
-	addStyle : function(r){
+	addStyle : function(r = {} ){
 		// check if is a valid rule object
 		if(!r.hasOwnProperty('rule') || !r.hasOwnProperty('style') ) return new app.error('app.Log.addStyle() : Invalid argument. Expected object structure : { rule:/regExp/ , style:"CSS-STRING" }');
 		// check if is a valid regexp rule, and string type CSS style
@@ -33,9 +33,9 @@ var Log = {
 	 * @param  {[type]} exp [description]
 	 * @return {[type]}     [description]
 	 */
-	removeStyle: function(exp){
+	removeStyle: function(exp = '' ){
 		for(let i = 0 ; i < _styleRules.length ; i++){
-			if( exp === _styleRules[i].rule.toString() ){
+			if( exp.toString() === _styleRules[i].rule.toString() ){
 				_styleRules[i].splice(i,1);
 				i--;
 			}
@@ -49,7 +49,7 @@ var Log = {
 	 * @param  {Boolean} silent [description]
 	 * @return {[type]}         [description]
 	 */
-	log : function(msg, type='log',silent=false){
+	log : function(msg = '' , type='log', silent=false){
 		let d = new Date();
 		// Log in console if console logging is enabled in config
 		if(app.config.log_console === true){

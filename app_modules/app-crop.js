@@ -1,43 +1,41 @@
 /* globals app */
 
-module.exports = {
+var Crop = {
 	status 		: null,
 	id 			: 1,
 	date_start 	: null,
 	crop_plan 	: null,
+	crop_day 	: null,
 	getCropEndDate : async function(){
 		app.log( 'app.Crop.getCropEndDate() : Calculating Crop End Date.');
-		let cropPlan = await app.Crop.getCropPlan();
-		return new Date( +app.Crop.date_start ).add( cropPlan.length ).days();
+		let cropPlan = await Crop.getCropPlan();
+		return new Date( +Crop.date_start ).add( cropPlan.length ).days();
 	},
 	/**
 	 * [description]
 	 * @param  {Date}   day [description]
 	 * @return {[type]}     [description]
 	 */
-	getCropDay : async function( day = new Date() ){
-		let modifier = 0;
-		let date = new Date();
-		if( !(day instanceof Date) ){
-			if(day === 'today') 			modifier = 0;
-			else if(day === 'yesterday') 	modifier = -1;
-			else if(day === 'tomorrow') 	modifier = +1;
-			else throw new app.error('app.crop.getCropDay() : Unknown value or reference provided as Date :'+day);
-		}else date = day;
+	getCropDay : async function( date = 'today' ){
+		if( !(date instanceof Date) ){
+			// if Crop.crop_day is not yet defined, force day resolution before
+			// proceding to semantic day request
+			if( Crop.crop_day === null ) Crop.crop_day = await Crop.getCropDay( new Date() );
+			// apply semantic day request...
+			if(date === 'today') 			return Crop.crop_day;
+			else if(date === 'yesterday') 	return Crop.crop_day - 1;  // to do, block < 0
+			else if(date === 'tomorrow') 	return Crop.crop_day + 1;  // to do , block bigger than last day
+			else throw new app.error('app.crop.getCropDay() : Unknown value or reference provided as Date :'+date);
+		}
 		app.log( 'app.Crop.getCropDay() : Searching for the cropDay matching to '+date);
-		if(modifier !== 0) app.log( 'app.Crop.getCropDay() : The "'+ (modifier===1?'TOMORROW':'PREVIOUS') + ' DAY" filter will be apllied on the result');
 
 		// get the cropCalendar, where the begining and end (real time Dates)
 		// of each cropDay is specified, and iterate it, comparing the current
 		// date and time , with each cropDay ranges, until the current timestamp
 		// fits in betwen a cropDay Start and End.
-		const calendar = await app.Crop.getCropCalendar();
+		const calendar = await Crop.getCropCalendar();
 		for(let d=0 ; d< calendar.length; d++){
 			if( date >= calendar[d].dayStart && date <= calendar[d].dayEnd ){
-				// match found!
-				// if 'yesterday' or 'tomorrow' flag days where provided apply
-				// them to fit the requested day.
-				d = d + modifier;
 				if(d<0 || d>=calendar.length) break;
 				else return d;
 			}
@@ -50,8 +48,8 @@ module.exports = {
 	 * @return {[type]}         [description]
 	 */
 	getCropPlan : async function( cropDay = '*'){
-		app.log( 'app.Crop.getCropPlan() : Retreaving crop Plan (' + app.Crop.crop_plan + ')');
-		const plan = await app.Db.query('SELECT * from crop_plans_conf WHERE crop_plan=' + app.Crop.crop_plan );
+		app.log( 'app.Crop.getCropPlan() : Retrieving crop Plan (' + Crop.crop_plan + ')');
+		const plan = await app.Db.query('SELECT * from crop_plans_conf WHERE crop_plan=' + Crop.crop_plan );
 		// RETURN ALL DAYS  (default)
 		if(cropDay==='*') return plan;
 		// RETURN A SINGLE DAY
@@ -59,10 +57,10 @@ module.exports = {
 			// accept an Integer, a Date, the keywords 'today', 'yesterday' and
 			// 'tomorrow' as valid Day selectors.
 			if( cropDay instanceof Date || cropDay === 'today' || cropDay === 'yesterday' || cropDay === 'tomorrow'){
-				cropDay = await app.Crop.getCropDay(cropDay);
+				cropDay = await Crop.getCropDay(cropDay);
 			}
 			// test day index before returning data
-			if(typeof plan[cropDay] === 'undefined') throw new app.error('app.Crop.getCropPlan() : Requested Day ('+cropDay+') does not exist in the PLAN ('+app.Crop.crop_plan+')');
+			if(typeof plan[cropDay] === 'undefined') throw new app.error('app.Crop.getCropPlan() : Requested Day ('+cropDay+') does not exist in the PLAN ('+Crop.crop_plan+')');
 			app.log('app.Crop.getCropPlan() : Plan for day' + cropDay + ':' , plan[cropDay]);
 			return plan[cropDay];
 		}
@@ -74,11 +72,11 @@ module.exports = {
 	 */
 	getCropCalendar : async function( cropDay='*' ){
 		const calendar=[];
-		app.log( 'app.Crop.getCropCalendar() : Retreaving crop Calendar ( based on CropPlan:' + app.Crop.crop_plan + ')');
-		const cropPlan = await app.Crop.getCropPlan();
+		app.log( 'app.Crop.getCropCalendar() : Retrieving crop Calendar (for cropPlan:' + Crop.crop_plan + ')');
+		const cropPlan = await app.Db.query('SELECT * from crop_plans_conf WHERE crop_plan=' + Crop.crop_plan );
 		for(let d=0 ; d<cropPlan.length ; d++){
 			let _start;
-			if( d===0 ) _start = app.Crop.date_start.at( cropPlan[d].day_start );
+			if( d===0 ) _start = Crop.date_start.at( cropPlan[d].day_start );
 			else _start = new Date( +calendar[ d-1 ].dayEnd ).add( { milliseconds : 1 } );
 
 			// Light goes on on the Sunrise (use dayStart Date and asign sunrise hour )
@@ -120,12 +118,15 @@ module.exports = {
 			// accept an Integer, a Date, the keywords 'today', 'yesterday' and
 			// 'tomorrow' as valid Day selectors.
 			if( cropDay instanceof Date || cropDay === 'today' || cropDay === 'yesterday' || cropDay === 'tomorrow'){
-				cropDay = await app.Crop.getCropDay(cropDay);
+				cropDay = await Crop.getCropDay(cropDay);
 			}
 			// test day index before returning data
-			if(typeof calendar[cropDay] === 'undefined') throw new app.error('app.Crop.getCropCalendar() : Requested Day ('+cropDay+') does not exist in the PLAN ('+app.Crop.crop_plan+')');
+			if(typeof calendar[cropDay] === 'undefined') throw new app.error('app.Crop.getCropCalendar() : Requested Day ('+cropDay+') does not exist in the PLAN ('+Crop.crop_plan+')');
 			else return calendar[cropDay];
 		}
 	},
 
 };
+
+
+module.exports = Crop;

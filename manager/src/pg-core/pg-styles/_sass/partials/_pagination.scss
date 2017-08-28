@@ -1,0 +1,32 @@
+/* PAGINATION */
+.pg-pagination{
+    width: 100%;
+    text-align: right;
+    margin-top: $s-biggest;
+    border-top: 1px solid #c1c1c6;
+    padding-top: $s-small;
+
+    .pg-pagination-item{
+	    display: inline-block;
+	    color: #9595a0;
+	    padding: $s-small ;
+	    font-size: $f-smaller;
+	    cursor: pointer;
+	    border: 1px solid #afafbd;
+        min-width: $s-bigger;
+  		text-align: center;
+        margin:$s-smallest;
+	    &:hover{
+	    	border-color:$c-main;
+	    	background:$c-main;
+	    	color:white;
+	    }
+    }
+
+    .pg-pagination-current{
+    	 background-color:#afafbd;
+    	 color:white;
+    	 cursor:default;
+    	 pointer-events:none;
+    }
+}

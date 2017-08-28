@@ -1,0 +1,72 @@
+/* NOTIFICATION BOXES */
+
+.pg-notification-error {
+    text-align: center;
+    position: relative;
+    font-size: $f-small;
+    font-weight: $f-regular;
+    background: $c-error;
+    color: $c-error-bright;
+    padding: $s-small ;
+    margin-bottom: $s-big;
+    margin-top: $s-big;
+}
+
+.pg-notification-error:before {
+    right: 10px;
+    top: -10px;
+    border-width: 7px 15px;
+    border-style: solid;
+    width: 0px;
+    content: "!";
+    position: absolute;
+    height: 20px;
+    color: $c-error;
+    box-shadow: 0 -2px 0px $c-error;
+    border-color: $c-error-bright;
+    border-bottom-color: transparent;
+    text-align: center;
+    font-weight: $f-bolder;
+    font-size: 14px;
+}
+
+.pg-notification-bubble{
+    position: fixed;
+    margin-top:none;
+    margin-bottom:none;
+    padding-left: $s-small;
+    padding-right: $s-small;
+    top: 0;
+    right: $s-biggest;
+    opacity: 0;
+    width: 130px;
+    z-index: 9999;
+    padding-bottom: 25px;
+    padding-top: 35px;
+    border-radius: 5px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.34);
+    border-bottom: 1px solid $c-gray-dark;
+    animation: pg-bubble 3s normal ease-in-out;
+
+}
+.pg-notification-bubble:before { right: 52px; }
+
+
+@keyframes pg-bubble {
+    0% {
+        top:$s-biggest * 2;
+        opacity: 0;
+    }
+    30% {
+        top:$s-biggest;
+        opacity: 1;
+    }
+    60% {
+        top:$s-biggest;
+        opacity: 1;
+    }
+    100% {
+        top:0px;
+        opacity:0;
+    }
+}

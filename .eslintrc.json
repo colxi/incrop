@@ -12,6 +12,7 @@
     "plugins": [
     ],
     "rules": {
+        "no-constant-condition" : "off",
         "no-unused-vars" : "warn",
         "no-console": "off",
         "no-mixed-spaces-and-tabs" :  "warn",
