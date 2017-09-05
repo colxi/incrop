@@ -2,7 +2,7 @@
 * @Author: colxi.kl
 * @Date:   2017-08-28 19:30:44
 * @Last Modified by:   colxi.kl
-* @Last Modified time: 2017-09-05 03:34:56
+* @Last Modified time: 2017-09-05 21:53:39
 */
 'use strict';
 
@@ -15,6 +15,7 @@
 *
 *******************************************************************************/
 var https 		= require('https');
+var http 		= require('http');
 var url 		= require('url');
 var path 		= require('path');
 var fs 			= require('fs');
@@ -45,7 +46,9 @@ var server = {
 		'db_user' 						: 'root',
 		'db_pwd' 						: '',
 		'db_name'						: 'enefty',
+		// NOTE: Some servers would not support HTTPS
 		// NOTE: Some ports (like 443) can require root privileges to be opened
+		'protocol' 						: 'https',
 		'server_port' 					: 443,
 		// Absolute URL to MODELS directory
 		'models_uri'  					: '/pg-models/',
@@ -116,7 +119,7 @@ var server = {
 	 * @param  {[type]} '\')           [description]
 	 * @return {[type]}                [description]
 	 */
-	init : function(){
+	init : async function(){
 		// *********************************************************************
 		//
 		// Load native & custom Config
@@ -128,6 +131,14 @@ var server = {
 			console.log('server.init() : Loading pg-config.json...');
 			cjson.extend(true, server.config , cjson.load( path.join ( basedir , 'pg-config.json') ) );
 		}
+
+		var portAvailable = await server.isPortAvailable(server.config.server_port);
+		if(!portAvailable){
+			console.log('server.init() : Port ' + server.config.server_port + ' already in use. Aborting.');
+			return;
+		}
+
+
 		// CUSTOM CONFIG JSON sanitizer...
 		// Prevent server.config.defaultDirectoryIndex to try to escape from
 		// the requested directory, pointing to some non contained file.
@@ -144,102 +155,106 @@ var server = {
 
 		// *********************************************************************
 		//
-		// initiate the server
+		// initiate the server: HTTP / HTTPS
 		//
-		https.createServer(certificates , function(request, response) {
-			// CORS !
-			// If CORS are enabled in config, configure them...
-			if( server.config.cross_origin_allow_requests ){
-				// Allowed requesters...
-				response.setHeader('Access-Control-Allow-Origin',
-					server.config.cross_origin_allow_origin );
-				// Allowed Methods
-				response.setHeader('Access-Control-Allow-Methods',
-					server.config.cross_origin_allow_methods );
-				// Allowed headers
-				response.setHeader('Access-Control-Allow-Headers',
-					server.config.cross_origin_allow_headers );
-				// If enabled cookies will be included in the requests
-				response.setHeader('Access-Control-Allow-Credentials',
-					server.config.cross_origin_allow_credentials );
-			}
-			// obtain the URI of the requested element... and remove double  or
-			// more slashes (//) from adreess (they could bypass filters)
-			var uri = url.parse(request.url).pathname;
-			uri = uri.replace(/\/\/+/g, '/');
-
-
-			// *****************************************************************
-			// FILTER : FORBIDDEN DIRECTIVES
-			// Join the default forbidden directives with the user provided
-			// in config, to generate a single list with all the directives
-			//
-			let forbidden_directives = {};
-			forbidden_directives =  server.pg_forbidden_uri.concat(server.config.forbidden_uri);
-			// Check if any Forbiden directive affects the current request.
-			for (let i=0; i< forbidden_directives.length;i++){
-				let  regex_path;
-				if(forbidden_directives[i] instanceof RegExp){
-					// REGULAR EXPRESSIONS DIRECTIVES
-					regex_path = forbidden_directives[i];
-				}else{
-					// STRING DIRECTIVES
-					// ESCAPE ANY CHARACTER in the DIRECTIVE that could be
-					// interpreted as a RegExp operand before runing the URI chek
-					let escapedDirective = server.escapeRegExpTokens( forbidden_directives[i] );
-					// check if the DIRECTIVE represents an ABSOLUTE path.
-					let absPath =  forbidden_directives[i].slice(0,1) === '/' ? true : false;
-					// Create a RegExpr for the DIRECTIVE
-					regex_path = absPath ? new RegExp('^' + escapedDirective ) : new RegExp(escapedDirective );
-				}
-				// Run the RegExp Directive. If applies, block the request!
-				if( regex_path.test( uri ) ){
-					console.log( 'FORBIDDEN | ' + uri );
-					return server.throwError(response, 403, 'PG-Forbidden');
-				}
-			}
-			// CLEAN ! no directives are aplicable! continue with the request!
-
-
-			// *****************************************************************
-			//
-			// Identify the request TYPE : "FILE REQUEST" or "MODEL EXECUTION"...
-			// Comparing the requested URI with config.models_uri (escaped version)
-			//
-			var escapedModelsPath  	= server.escapeRegExpTokens(server.config.models_uri);
-			var regex_Modelspath 	= new RegExp('^' + escapedModelsPath );
-			// get the path to the model file
-			var filepath 	= path.join(basedir , uri );
-			//
-			if( regex_Modelspath.test( uri ) ){
-				// MODEL EXECUTION REQUEST!
-				// get the model name
-				let modelName 	= uri.substring( server.config.models_uri.length , uri.length);
-				// get the method to call
-				let methodName 	= url.parse(request.url, true).query;
-				methodName 		= methodName[server.config.models_method_query];
-
-				server.modelRequest(request, response, filepath, modelName, methodName);
-			}else{
-				// FILE REQUEST!
-				let extension = path.extname(filepath);
-				server.fileRequest(request, response, filepath, uri, extension);
-			}
-			// done!
-			return true;
-			//
-		}).listen(parseInt( server.config.server_port, 10));
-
+		if(server.config.protocol==='https'){
+			https.createServer(certificates , function(request, response){ server.requestListener(request, response)  } ).listen(parseInt( server.config.server_port ));
+		} else{
+			http.createServer( function(request, response){ server.requestListener(request, response) }).listen(parseInt( server.config.server_port ));
+		}
 
 		//
 		// *********************************************************************
 		//
 		// OUTPUT MESSAGE IN CONSOLE
 		console.log('');
-		console.log('Static file server running at => https://localhost:' + server.config.server_port );
+		console.log('Static file server running at => ' + server.config.protocol + '://localhost:' + server.config.server_port );
 		console.log('(Press CTRL + C to exit)');
 		console.log('---------------------------------------------------------');
 		console.log('');
+	},
+	requestListener : function(request, response){
+		// CORS !
+		// If CORS are enabled in config, configure them...
+		if( server.config.cross_origin_allow_requests ){
+			// Allowed requesters...
+			response.setHeader('Access-Control-Allow-Origin',
+				server.config.cross_origin_allow_origin );
+			// Allowed Methods
+			response.setHeader('Access-Control-Allow-Methods',
+				server.config.cross_origin_allow_methods );
+			// Allowed headers
+			response.setHeader('Access-Control-Allow-Headers',
+				server.config.cross_origin_allow_headers );
+			// If enabled cookies will be included in the requests
+			response.setHeader('Access-Control-Allow-Credentials',
+				server.config.cross_origin_allow_credentials );
+		}
+		// obtain the URI of the requested element... and remove double  or
+		// more slashes (//) from adreess (they could bypass filters)
+		var uri = url.parse(request.url).pathname;
+		uri = uri.replace(/\/\/+/g, '/');
+
+
+		// *****************************************************************
+		// FILTER : FORBIDDEN DIRECTIVES
+		// Join the default forbidden directives with the user provided
+		// in config, to generate a single list with all the directives
+		//
+		let forbidden_directives = {};
+		forbidden_directives =  server.pg_forbidden_uri.concat(server.config.forbidden_uri);
+		// Check if any Forbiden directive affects the current request.
+		for (let i=0; i< forbidden_directives.length;i++){
+			let  regex_path;
+			if(forbidden_directives[i] instanceof RegExp){
+				// REGULAR EXPRESSIONS DIRECTIVES
+				regex_path = forbidden_directives[i];
+			}else{
+				// STRING DIRECTIVES
+				// ESCAPE ANY CHARACTER in the DIRECTIVE that could be
+				// interpreted as a RegExp operand before runing the URI chek
+				let escapedDirective = server.escapeRegExpTokens( forbidden_directives[i] );
+				// check if the DIRECTIVE represents an ABSOLUTE path.
+				let absPath =  forbidden_directives[i].slice(0,1) === '/' ? true : false;
+				// Create a RegExpr for the DIRECTIVE
+				regex_path = absPath ? new RegExp('^' + escapedDirective ) : new RegExp(escapedDirective );
+			}
+			// Run the RegExp Directive. If applies, block the request!
+			if( regex_path.test( uri ) ){
+				console.log( 'FORBIDDEN | ' + uri );
+				return server.throwError(response, 403, 'PG-Forbidden');
+			}
+		}
+		// CLEAN ! no directives are aplicable! continue with the request!
+
+
+		// *****************************************************************
+		//
+		// Identify the request TYPE : "FILE REQUEST" or "MODEL EXECUTION"...
+		// Comparing the requested URI with config.models_uri (escaped version)
+		//
+		var escapedModelsPath  	= server.escapeRegExpTokens(server.config.models_uri);
+		var regex_Modelspath 	= new RegExp('^' + escapedModelsPath );
+		// get the path to the model file
+		var filepath 	= path.join(basedir , uri );
+		//
+		if( regex_Modelspath.test( uri ) ){
+			// MODEL EXECUTION REQUEST!
+			// get the model name
+			let modelName 	= uri.substring( server.config.models_uri.length , uri.length);
+			// get the method to call
+			let methodName 	= url.parse(request.url, true).query;
+			methodName 		= methodName[server.config.models_method_query];
+
+			server.modelRequest(request, response, filepath, modelName, methodName);
+		}else{
+			// FILE REQUEST!
+			let extension = path.extname(filepath);
+			server.fileRequest(request, response, filepath, uri, extension);
+		}
+		// done!
+		return true;
+		//
 	},
 	/**
 	 * [fileRequest description]
@@ -441,6 +456,19 @@ var server = {
 		var regex = RegExp('[' + specials.join('\\') + ']', 'g');
 		// done!
 		return str.replace(regex, '\\$&');
+	},
+	/**
+	 * [isPortTaken description]
+	 * @param  {[type]}  port [description]
+	 * @return {Boolean}      [description]
+	 */
+	isPortAvailable : function(port){
+		return new Promise((resolve, reject) => {
+			const tester = http.createServer()
+				.once('error', err => (err.code == 'EADDRINUSE' ? resolve(false) : reject(err)))
+				.once('listening', () => tester.once('close', () => resolve(true)).close())
+				.listen(port);
+		});
 	}
 };
 
