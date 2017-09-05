@@ -1168,13 +1168,13 @@ input[type=range]:focus::-ms-fill-upper {
 
 /* RIVETS LOADER */
 /* line 2, ../../src/styles/pg-partials/_loader.scss */
-.pg-loader *, .pg-loading *, [pg-loader] *, [pg-loading] *, [rv-loading] * {
+.pg-loader *, .pg-loading *, [pg-loader] *, [pg-loading] *, [pg-loading] * {
   transition: none !important;
   opacity: 0 !important;
 }
 
 /* line 7, ../../src/styles/pg-partials/_loader.scss */
-.pg-loader, .pg-loading, [pg-loader], [pg-loading], [rv-loading] {
+.pg-loader, .pg-loading, [pg-loader], [pg-loading], [pg-loading] {
   visibility: hidden !important;
   position: relative !important;
   pointer-events: none !important;
@@ -1183,7 +1183,7 @@ input[type=range]:focus::-ms-fill-upper {
   transition: none !important;
 }
 /* line 16, ../../src/styles/pg-partials/_loader.scss */
-.pg-loader:before, .pg-loading:before, [pg-loader]:before, [pg-loading]:before, [rv-loading]:before {
+.pg-loader:before, .pg-loading:before, [pg-loader]:before, [pg-loading]:before, [pg-loading]:before {
   content: "";
   display: inline-block;
   position: absolute;
@@ -1201,7 +1201,7 @@ input[type=range]:focus::-ms-fill-upper {
   visibility: visible;
 }
 /* line 34, ../../src/styles/pg-partials/_loader.scss */
-.pg-loader:after, .pg-loading:after, [pg-loader]:after, [pg-loading]:after, [rv-loading]:after {
+.pg-loader:after, .pg-loading:after, [pg-loader]:after, [pg-loading]:after, [pg-loading]:after {
   content: attr(pg-loading);
   display: block;
   width: 100%;

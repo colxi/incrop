@@ -1,10 +1,10 @@
 /* RIVETS LOADER */
-.pg-loader  *, .pg-loading *, [pg-loader] *, [pg-loading] *, [rv-loading] *{
+.pg-loader  *, .pg-loading *, [pg-loader] *, [pg-loading] *, [pg-loading] *{
     transition: none !important;
     opacity : 0 !important;
 }
 
-.pg-loader  , .pg-loading , [pg-loader] , [pg-loading] , [rv-loading]{
+.pg-loader  , .pg-loading , [pg-loader] , [pg-loading] , [pg-loading]{
 	visibility: hidden !important;
 	position: relative !important;
     pointer-events: none !important;

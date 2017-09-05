@@ -2,7 +2,7 @@
 * @Author: colxi.kl
 * @Date:   2017-08-28 19:30:44
 * @Last Modified by:   colxi.kl
-* @Last Modified time: 2017-09-05 03:00:35
+* @Last Modified time: 2017-09-05 03:34:56
 */
 'use strict';
 
@@ -19,7 +19,7 @@ var url 		= require('url');
 var path 		= require('path');
 var fs 			= require('fs');
 var querystring = require('querystring');
-var cjson   	= require('./node_modules/cjson'); 		// can Read commented json files
+var cjson   	= require('./pg-server/node_modules/cjson'); 		// can Read commented json files
 
 // CLEAR SCREEN
 //process.stdout.write('\x1Bc');
@@ -219,15 +219,7 @@ var server = {
 				let methodName 	= url.parse(request.url, true).query;
 				methodName 		= methodName[server.config.models_method_query];
 
-				try{
-					server.modelRequest(request, response, filepath, modelName, methodName);
-				}catch(err){
-					let modelResponse= {type :'PG_ERROR' , err : err.stack};
-					response.writeHead(200, { 'Content-Type':  'text/plain; charset=UTF-8'});
-					response.write( JSON.stringify(modelResponse) , 'utf8');
-					response.end();
-				}
-
+				server.modelRequest(request, response, filepath, modelName, methodName);
 			}else{
 				// FILE REQUEST!
 				let extension = path.extname(filepath);
@@ -382,8 +374,12 @@ var server = {
 			methodArgsArray = JSON.parse(methodArgsArray);
 			dataRaw = '';
 
-			let modelResponse = pg.models[modelName][methodName](...methodArgsArray);
-
+			let modelResponse;
+			try{
+				modelResponse = pg.models[modelName][methodName](...methodArgsArray);
+			}catch(err){
+				modelResponse= {type :'PG_ERROR' , err : err.stack};
+			}
 			response.writeHead(200, { 'Content-Type':  'text/plain; charset=UTF-8'});
 			response.write( JSON.stringify(modelResponse) , 'utf8');
 			response.end();

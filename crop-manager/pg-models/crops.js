@@ -1,5 +1,4 @@
 /* global  pg */
-var guid = require('guid');
 
 let categories = {
 	__constructor(){

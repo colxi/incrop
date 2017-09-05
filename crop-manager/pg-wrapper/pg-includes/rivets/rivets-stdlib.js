@@ -393,7 +393,7 @@
      * formatting syntax.
      *
      * ```html
-     * <span rv-value="model:date | date 'dddd, MMMM Do'"></span>
+     * <span pg-value="model:date | date 'dddd, MMMM Do'"></span>
      * ```
      *
      * @see {@link http://momentjs.com/docs/#/displaying} for format options.

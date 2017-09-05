@@ -1,13 +1,13 @@
 <section>
 	<header class="pg-row pg-section-header">
-		<h2 class="pg-col" rv-text="categories.form.title | getProperty categories.form.mode"></h2>
+		<h2 class="pg-col" pg-text="categories.form.title | getProperty categories.form.mode"></h2>
 		<div class="pg-col pg-text-right">
-			<div class="pg-col pg-btn" rv-on-click="categories.list.initialize">Cancel<i class="fa fa-close"></i></div>
+			<div class="pg-col pg-btn" pg-on-click="categories.list.initialize">Cancel<i class="fa fa-close"></i></div>
 		</div>
 	</header>
-	<div class="pg-notification-error pg-notification-bubble" rv-if="categories.form.error" rv-text="categories.form.error"></div>
+	<div class="pg-notification-error pg-notification-bubble" pg-if="categories.form.error" pg-text="categories.form.error"></div>
 	<!-- categories DECLARATION form -->
-	<form rv-element="categories.form.UI.categoryDeclarationForm" rv-show="categories.form.active | === 'categoryDeclarationForm'">
+	<form pg-element="categories.form.UI.categoryDeclarationForm" pg-show="categories.form.active | === 'categoryDeclarationForm'">
 		<div class="pg-row feedAssignationInstructions">
 			<div class="pg-col pg-vertical-center pg-no-gap">
 				<i class="fa fa-info-circle fa-2x"></i>
@@ -19,17 +19,17 @@
 		</div>
 
 		<!-- id -->
-		<input type="text"  hidden rv-value="categories.form.Data.id">
+		<input type="text"  hidden pg-value="categories.form.Data.id">
 		<div class="pg-row">
 			<!-- name -->
 			<label class="pg-col pg-form-control">
-				<input type="text" rv-value="categories.form.Data.name" rv-element="categories.form.UI.categoryName" autofocus required rv-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
+				<input type="text" pg-value="categories.form.Data.name" pg-element="categories.form.UI.categoryName" autofocus required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
 				<span>Name :</span>
 			</label>
 		</div>
 		<div class="pg-row pg-form-footer">
 			<div class="pg-col">
-				<div class="pg-btn" rv-on-click="categories.form.validate_categoryDeclarationForm">Save Category<i class="fa fa-arrow-right"></i></div>
+				<div class="pg-btn" pg-on-click="categories.form.validate_categoryDeclarationForm">Save Category<i class="fa fa-arrow-right"></i></div>
 			</div>
 		</div>
 	</form>
