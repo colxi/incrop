@@ -1,0 +1,28 @@
+{
+	// DB connection config
+	"db_host" 						: "localhost",
+	"db_user" 						: "root",
+	"db_pwd" 						: "",
+	"db_name"						: "",
+	// NOTE: Some ports (like 443) can require root privileges to be opened
+	"server_port" 					:  443,
+	"models_path"  					: "/pg-models/",
+	// Variable holding the POST data. NOTE: must match with PG-client conf!
+	"post_var" 						: "d",
+	// when requested a directory but not provided a file to open from it
+	// will redirect to the default index filename
+	"defaultDirectoryIndex" 		: "index.html",
+	// CORS : Cross Origin Resource Sharing.
+	// Warning! Certain configurations could drive the Client (Browser) to
+	// preflight the request, changing the request method to "OPTIONS".
+	// That would make any MODEL EXECUTION call, FAIL (expects POST request)
+	"cross_origin_allow_requests"   : true,
+	"cross_origin_allow_origin" 	: "*",
+	"cross_origin_allow_methods" 	: "GET,POST,OPTIONS,PUT,PATCH,DELETE",
+	"cross_origin_allow_headers" 	: "Content-type",
+	"cross_origin_allow_credentials": false,
+	// SLL Certificates paths. If needed, new selfsigned certificates can be
+	// generated using the ./pg-wonders/pg-certificates/generate.sh script
+	"ssl_private_key_path" 			: "./pg-wrapper/pg-certificates/server.key",
+	"ssl_certificate_path" 			: "./pg-wrapper/pg-certificates/server.crt"
+}

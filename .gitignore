@@ -10,5 +10,9 @@
 /node_modules
 /npm-debug.log
 
-
+pg-config\.json
 app-config\.json
+
+
+crop-manager/pg-models/node_modules
+crop-client/node_modules

@@ -1,0 +1,35 @@
+<section>
+	<!-- crops listing -->
+	<header class="pg-row pg-section-header">
+		<h2 class="pg-col"><i class="fa fa-bars pg-margin-right-small"></i>Crops :</h2>
+		<div class="pg-col pg-text-right">
+			<div class="pg-col pg-btn" pg-on-click="crops.form.initialize | args 'new'"><i class="fa fa-plus-circle"></i>Add</div>
+		</div>
+	</header>
+
+
+	<div class="pg-row">
+		<div class="pg-table pg-expand">
+			<div class="pg-row pg-no-gap" pg-each-crop="crops.list.page.items">
+				<div class="pg-col-40">
+					{crop.name}
+				</div>
+				<div class="pg-col-45 pg-text-center pg-text-smallest">
+					{crop.status}.
+				</div>
+				<div class="pg-col pg-text-center">
+					<i class="fa fa-pencil pg-hover pg-margin-right-smallest pg-margin-left-smallest" pg-on-click="crops.form.initialize | () crop.id" ></i>
+					<i class="fa fa-trash pg-hover pg-margin-left-smallest"  pg-on-click="crop.list.show_deleteCategoryDialog | () crop.id"></i>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="pg-row">
+		<div class="pg-col pg-pagination">
+			<div class="pg-pagination-item" pg-on-click="crops.list.page.set | () crops.list.page.current -1">Previous</div>
+			<div class="pg-pagination-item" pg-on-click="crops.list.page.set | () %page% +1" pg-each-page="crops.list.page.total | Array" pg-class-pg-pagination-current="%page% | add 1 | === crops.list.page.current">{%page% | add 1}</div>
+			<div class="pg-pagination-item" pg-on-click="crops.list.page.set | () crops.list.page.current +1" >Next</div>
+		</div>
+	</div>
+</section>
