@@ -20,10 +20,11 @@ module.exports =  {
 	 */
 	createConnection: function( config = {} ){
 		_link = mysql.createConnection({
-			host     : config.host,
-			user     : config.user,
-			password : config.password,
-			database : config.database
+			host     : config.host || 'localhost',
+			port 	 : config.port || 3306,
+			user     : config.user || 'root',
+			password : config.password || '',
+			database : config.database || ''
 		});
 		return true;
 	},

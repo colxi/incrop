@@ -16,3 +16,5 @@ app-config\.json
 
 crop-manager/pg-models/node_modules
 crop-client/node_modules
+
+crop-manager/pg-wrapper/pg-server/node_modules/

@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "async-mysql": "^1.0.1",
+    "cjson": "^0.5.0",
+    "querystring": "^0.2.0"
+  }
+}
