@@ -2,7 +2,7 @@
 * @Author: colxi.kl
 * @Date:   2017-08-28 19:30:44
 * @Last Modified by:   colxi.kl
-* @Last Modified time: 2017-09-08 19:30:37
+* @Last Modified time: 2017-09-15 00:10:24
 */
 'use strict';
 
@@ -14,14 +14,14 @@
 * AND DIRECTORIES
 *
 *******************************************************************************/
-var https 		= require('https');
-var http 		= require('http');
-var url 		= require('url');
-var path 		= require('path');
-var fs 			= require('fs');
-var querystring = require('querystring');
-var cjson   	= require('cjson');
-var async_mysql = require('async-mysql');
+var http 			= null;
+var url 			= require('url');
+var path 			= require('path');
+var fs 				= require('fs');
+var querystring 	= require('querystring');
+var cjson   		= require('cjson');
+var async_mysql 	= require('async-mysql');
+var isPortAvailable = require('is-port-available');
 
 // CLEAR SCREEN
 //process.stdout.write('\x1Bc');
@@ -35,122 +35,77 @@ var pg = global.pg  = { models : {} };
 var basedir = process.cwd();
 
 
-var server = {
-	Database : async_mysql,
+var server = global.server = {
+	Database : null,
 	/**
 	 * [config description]
 	 * @type {Object}
 	 */
 	// DEFAULT SERVER CONFIG!
-	config : {
-		//
-		//*** DB CONFIG
-		//
-		// NOTE: Some servers would not support HTTPS
-		// Some ports (like 443) can require root privileges to be opened
-		'db_auto_connect' 				: true,
-		'db_host' 						: 'localhost',
-		'db_port'						: 3306,
-		'db_user' 						: 'root',
-		'db_pwd' 						: '',
-		'db_name'						: 'enefty',
-		'protocol' 						: 'https',
-		'server_port' 					: 443,
-		//
-		// *** MODELS CONFIG
-		//
-		// disable Cache on development enviroments (prevents the need of reboot
-		// server after changes in models code )
-		'models_use_cache' 				: false,
-		'models_request_max_size' 		: 500,
-		// Absolute URL to MODELS directory
-		'models_uri'  					: '/pg-models/',
-		// Variable Name, holding the required Merhod in URL, for METHOD CALLs.
-		'models_method_query' 			: 'method',
-		// Variable Name, holding the Args in the POST data, for METHOD calls.
-		'models_method_args_query' 		: 'args',
-		//
-		// ** HTTP SERVER CONFIG
-		//
-		// when requested a directory but not provided a file to open from it
-		// will redirect to the default index filename
-		'defaultDirectoryIndex' 		: 'index.html',
-		// CORS : Cross Origin Resource Sharing.
-		// Warning! Certain configurations could drive the Client (Browser) to
-		// preflight the request, changing the request method to "OPTIONS".
-		// That would make any MODEL EXECUTION call, FAIL (expects POST request)
-		'cross_origin_allow_requests'   : true,
-		'cross_origin_allow_origin' 	: '*',
-		'cross_origin_allow_methods' 	: 'GET,POST,OPTIONS,PUT,PATCH,DELETE',
-		'cross_origin_allow_headers' 	: 'Content-type',
-		'cross_origin_allow_credentials': false,
-		// SLL Certificates paths. If needed, new selfsigned certificates can be
-		// generated using the ./pg-wonders/pg-certificates/generate.sh script
-		'ssl_private_key_path' 			: './certificates/server.key',
-		'ssl_certificate_path' 			: './certificates/server.crt',
-		// Declare "Foridden directives" inside the Array, to block the targeted
-		// URIs LOADING, using String or Regular Expressions.
-		// Specs :
-		// - String Directives with a '/' character in their begining , will be
-		// considered Absolute paths (to be blocked as their children chain).
-		// - String Entries that don't begin with a slash would activate the directive
-		// in those URI request where the String could be located in any position.
-		// eg:
-		// '/pg-wrapper/pg-certificates/
-		// ---> Would Block any "FILE REQUEST" pointing to that directory, or any
-		// content inside (and inside the nested directories and files).
-		// '.sql'
-		// ---> Would Block any "FILE REQUEST" where the substring '.sql' could be
-		// found in the URI
-		//
-		// Regular Expression Directives, are aplied as provided, testing them
-		// against the URI string. When the regExp.test succeeds positivelly, the
-		// request is BLOCKED.
-		//
-		forbidden_uri : [
-			// '/node_modules/',	// blocks requests to root node_modules dir
-			// 'node_modules/', 	// blocks requests to any dir that ends in node_modules/
-			// /\/node_modules\//   // blocks requests to any folder called node_modules
-		]
-	},
+	config : null,
 	//
 	// PG internal security FORBIDDEN DIRECTIVES. Protect critical files and
 	// folders, blocking those calls that request them,.
 	pg_forbidden_uri : [
-		'/node_modules/',
-		// configuration files should never be exposed
-		'/pg-config.json',
+		// don't expose config-demo file
 		'/pg-config-demo.json',
 		// this file , should never be exposed
-		'/pg-wrapper/pg-server.js',
+		'/pg-wrapper/pg-server/pg-server.js',
 		// SSL certificates must remain private in the server
-		'/pg-wrapper/pg-certificates/',
+		'/pg-wrapper/pg-server/certificates/',
 		// PG Feature : private PG directories
-		/\/pg-private\//
+		/\/pg-private\//,
+		// block node modules directory contents requests, to prevent any
+		// execution of potentially vulnerable third party code
+		/\/node_modules\//
 	],
 	/**
-	 * [description]
-	 * @param  {Object} ){						const certificates  [description]
-	 * @param  {[type]} '\')           [description]
-	 * @return {[type]}                [description]
+	 *
+	 * server.init() Loads the user config, sanitizes config values if required,
+	 * establishes connection to the database if setted in config, and finally
+	 * starts the server (HTTP or HTTPS) on requested port.
+	 *
+	 * @return 			{void}
+	 *
 	 */
 	init : async function(){
 		// *********************************************************************
 		//
-		// Load native & custom Config
+		// Load Config
 		//
-		if( !fs.existsSync( path.join(basedir,  'pg-config.json' ) ) ){
-			console.log('server.init() : Can\'t find /pg-config.json.');
-			console.log('server.init() : Using default server config.');
+		// ...default config
+		console.log('server.init() : Loading pg-config-default.json...');
+		const defaultConfigFilePath =  path.join(basedir,  '/pg-wrapper/pg-config-default.json' );
+		if( !fs.existsSync( defaultConfigFilePath ) || fs.statSync(defaultConfigFilePath).isDirectory() ){
+			// block if can't find file.
+			console.log('server.init() : Can\'t find pg-config-default.json FILE. Aborted!');
+			return void(0);
 		}else{
-			console.log('server.init() : Loading pg-config.json...');
-			cjson.extend(true, server.config , cjson.load( path.join ( basedir , 'pg-config.json') ) );
+			try{ server.config = cjson.load( defaultConfigFilePath ) }
+			catch(err){
+				// block if can't parse config object
+				console.log('server.init() : FAILED parsing pg-config-default.json file. Aborted!');
+				console.log(err.message);
+				return void(0);
+			}
+		}
+		// ... custom config
+		console.log('server.init() : Loading pg-config.json...');
+		const configFilePath =  path.join(basedir,  'pg-config.json' );
+		if( !fs.existsSync( configFilePath ) || fs.statSync(configFilePath).isDirectory() ){
+			// Warn if user config can't be find
+			console.log('server.init() : WARN : Can\'t find /pg-config.json. Using default server config.');
+		}else{
+			// warn if user confir cant be parsed
+			try{ cjson.extend(true, server.config , cjson.load( configFilePath ) ) }
+			catch(err){ console.log('server.init() : WARN : FAILED parsing pg-config.json file. Using Default config!') }
 		}
 
-		var portAvailable = await server.isPortAvailable(server.config.server_port);
+		// check if server port is available
+		var portAvailable = await isPortAvailable(server.config.server_port);
 		if( portAvailable !== true ){
 			console.log('server.init() : HTTP Server Port ' + server.config.server_port + ' can\'t be opened.');
-			console.log('server.init() : Reason : ' , portAvailable);
+			console.log('server.init() : Reason : ' , isPortAvailable.lastError );
 			console.log('server.init() : Aborted!');
 			return;
 		}
@@ -162,51 +117,93 @@ var server = {
 		// compromise the whole permision DIRECTIVES, and security restrictions
 		// (like Protected folders, and protected files)
 		server.config.defaultDirectoryIndex = server.config.defaultDirectoryIndex.split('/').join();
-		// Path to the required SSL Certificate and Key for HTTPS protocol
-		const certificates = {
-			key: fs.readFileSync( path.join( basedir , server.config.ssl_private_key_path) ),
-			cert: fs.readFileSync( path.join ( basedir , server.config.ssl_certificate_path) )
-		};
+		// [more config checks here...]
+		//
 
-		// Connect to the database
+		// *********************************************************************
+		//
+		// Connect to the database if requireed in config
+		//
 		if(server.config.db_auto_connect){
 			console.log('server.init() : Connecting to Database...');
-			var link = server.Database.connect({
-				host 		: server.config.db_host,
-				port 		: server.config.db_port,
-				database 	: server.config.db_name,
-				user 		: server.config.db_user,
-				password 	: server.config.db_pwd
-			});
-
-			if( link instanceof Error ){
+			try{
+				server.Database = await async_mysql.connect({
+					host 		: server.config.db_host,
+					port 		: server.config.db_port,
+					database 	: server.config.db_name,
+					user 		: server.config.db_user,
+					password 	: server.config.db_pwd
+				});
+			}catch(err){
 				console.log('server.init() : Can\'t connect to Database in host ' + server.config.db_host +':' +server.config.db_port );
-				console.log('server.init() : Reason : ' + link.code);
+				console.log('server.init() : Reason : ' + err);
 				console.log('server.init() : Aborted!');
-				return;
+				return void(0);
 			}
+
 			console.log('server.init() : Connected!');
-		}
+		}else console.log('server.init() : Database Connection not required in pg-config. Skipped.');
+
 		// *********************************************************************
 		//
 		// initiate the server: HTTP / HTTPS
 		//
-		if(server.config.protocol==='https'){
-			https.createServer(certificates , function(request, response){ server.requestListener(request, response)  } ).listen(parseInt( server.config.server_port ));
-		} else{
+		if(server.config.server_protocol === 'https'){
+			//
+			// HTTPS SERVER
+			//
+			// Path to the required SSL Certificate and Key files for HTTPS
+			console.log('server.init() : Starting HTTPS server...' );
+			let certificates_key_file  = path.join( basedir , server.config.ssl_private_key_uri);
+			let certificates_cert_file = path.join ( basedir , server.config.ssl_certificate_uri);
+			// check if the Certificate files exist. if not abort server boot
+			if( !fs.existsSync( certificates_key_file ) || fs.statSync(certificates_key_file).isDirectory() ){
+				console.log('server.init() : Can\'t find The certificate key file in ' + certificates_key_file + '. Aborted.' );
+				return void(0);
+			}
+			if( !fs.existsSync( certificates_cert_file ) || fs.statSync(certificates_cert_file).isDirectory() ){
+				console.log('server.init() : Can\'t find The certificate file in ' + certificates_cert_file + '. Aborted.' );
+				return void(0);
+			}
+			const certificates = {
+				key: fs.readFileSync( certificates_key_file  ),
+				cert: fs.readFileSync(  certificates_cert_file )
+			};
+			http = require('https');
+			http.createServer(certificates , function(request, response){ server.requestListener(request, response)  } ).listen(parseInt( server.config.server_port ));
+		}else{
+			//
+			// HTTP SERVER
+			//
+			console.log('server.init() : Starting HTTP server....' );
+			http = require('http');
 			http.createServer( function(request, response){ server.requestListener(request, response) }).listen(parseInt( server.config.server_port ));
 		}
 
-		//
 		// *********************************************************************
 		//
-		// OUTPUT MESSAGE IN CONSOLE
+		// OUTPUT info MESSAGE IN CONSOLE
 		console.log('');
-		console.log('Static file server running at => ' + server.config.protocol + '://localhost:' + server.config.server_port );
+		console.log('Static file server running at => ' + server.config.server_protocol + '://localhost:' + server.config.server_port );
 		console.log('(Press CTRL + C to exit)');
 		console.log('---------------------------------------------------------');
 		console.log('');
+
+		return void(0);
 	},
+	/**
+	 * server.requestListener() : Listens for requests and processes them, after
+	 * aplying the setted filters, wich may block some of them due to the user
+	 * stablished rules. Those requests that are not blocked by filters, will be
+	 * split in FILE REQUESTS and MODEL EXECUTION REQUEST, and handled by the
+	 * corresponding subroutine.
+	 *
+	 * @param  		{object} 	request  	http(s).resquest object
+	 * @param  		{object} 	response 	http(s).response object
+	 *
+	 * @return 		{void}
+	 *
+	 */
 	requestListener : function(request, response){
 		// CORS !
 		// If CORS are enabled in config, configure them...
@@ -265,17 +262,16 @@ var server = {
 		// *****************************************************************
 		//
 		// Identify the request TYPE : "FILE REQUEST" or "MODEL EXECUTION"...
-		// Comparing the requested URI with config.models_uri (escaped version)
+		// Comparing the requested URI with config.baseurl_models (escaped version)
 		//
-		var escapedModelsPath  	= server.escapeRegExpTokens(server.config.models_uri);
+		var escapedModelsPath  	= server.escapeRegExpTokens(server.config.baseurl_models);
 		var regex_Modelspath 	= new RegExp('^' + escapedModelsPath );
 		// get the path to the model file
 		var filepath 	= path.join(basedir , uri );
-		//
 		if( regex_Modelspath.test( uri ) ){
 			// MODEL EXECUTION REQUEST!
 			// get the model name
-			let modelName 	= uri.substring( server.config.models_uri.length , uri.length);
+			let modelName 	= uri.substring( server.config.baseurl_models.length , uri.length);
 			// get the method to call
 			let methodName 	= url.parse(request.url, true).query;
 			methodName 		= methodName[server.config.models_method_query];
@@ -287,7 +283,7 @@ var server = {
 			server.fileRequest(request, response, filepath, uri, extension);
 		}
 		// done!
-		return true;
+		return void(0);
 		//
 	},
 	/**
@@ -301,6 +297,24 @@ var server = {
 	 */
 	fileRequest : function(request, response, filepath , uri, extension){
 		console.log( request.method + ' | FILE | ' + uri );
+		console.log( Array( (request.method.length + 4 ) ).join(' ')  + ( new Date() ).toLocaleString( server.config.date_locale) + ' from ' + request.connection.remoteAddress);
+
+		// HANDLE SPECIAL REQUEST TO CONFIG file ... it will return the FINAL
+		// CONFIG OBJECT, with all the sensitive data removed (credentials)
+		if(uri === '/pg-config.json'){
+			let conf = JSON.parse( JSON.stringify(server.config) );
+			// remove sensitive data
+			conf.db_pwd = '[hidden]';
+			conf.db_user = '[hidden]';
+			// output resulting safe object
+			response.writeHead(200, { 'Content-Type':  'text/plain; charset=UTF-8'});
+			response.write( JSON.stringify(conf) , 'utf8');
+			response.end();
+			// done!
+			return void(0);
+		}
+
+
 		// If "file doesnt exist" or  ( is directory but filepath doesn't end with "/" char)
 		// Return 404 NOT FOUND error ("/" is mandatory for referencing a
 		// directory, if not present IS CONSIDERED A FILE )
@@ -366,10 +380,10 @@ var server = {
 					contentType= 'application/octet-stream';
 					break;
 			}
-			// else return to the client its contents , and end the conection.
-			//response.writeHead(200, { 'Content-Type':  'text/plain; charset=UTF-8'});
+			// else return to the client its contents (except when only HEAD
+			// is requested), and end the conection.
 			response.writeHead(200, { 'Content-Type':  contentType});
-			response.write(file, 'binary');
+			if( request.method !== 'HEAD' ) response.write(file, 'binary');
 			response.end();
 			// done!
 		});
@@ -384,33 +398,50 @@ var server = {
 	 * @return {[type]}            [description]
 	 */
 	modelRequest : function(request, response, filepath, modelName, methodName){
-		// RESERVED only POST method
+		// BLOCK CONNECTION IS USED METHOD IS NOT POST
 		console.log( request.method + ' | MODEL | '+ modelName + ':' + methodName );
+		console.log( Array( (request.method.length + 4 ) ).join(' ')  + ( new Date() ).toLocaleString( server.config.date_locale) + ' from ' + request.connection.remoteAddress);
+
 		if(request.method !== 'POST'){
 			return server.throwError(response, 405, 'HTTP Method not Allowed ('+request.method+'). Expected:POST ');
 		}
 
-		// check if model EXIST
+		// *** MODEL LOADING
+		//
+		// Check if model file exist
 		if( !fs.existsSync( filepath ) || fs.statSync( filepath ).isDirectory() ){
 			return server.throwError(response, 404, 'Model Does not exist');
 		}
-		// require model if has not been required previously (cached)
-		if( !pg.models.hasOwnProperty(modelName) ) pg.models[modelName] = require( filepath );
-		else if( !server.config.models_use_cache ){
-			// if is been required previously but cache is disabled,
-			// remove cache and load module again.
-			delete require.cache[require.resolve(filepath)];
-			delete pg.models[modelName];
-			pg.models[modelName] = require( filepath );
+		// Wrap the MODEL load in a Try/catch structure, to handle errors in
+		// requested model code.
+		try{
+			// Require model if has not been required previously (cached)
+			if( !pg.models.hasOwnProperty(modelName) ) pg.models[modelName] = require( filepath );
+			// If is been required previously but cache is disabled, load again
+			else if( !server.config.models_use_cache ){
+				// remove cache to ensure a clean model load
+				delete require.cache[require.resolve(filepath)];
+				delete pg.models[modelName];
+				pg.models[modelName] = require( filepath );
+			}
+		}catch(err){
+			// Errors where found in MODEL CODE, handle them returning to client
+			// the generated error object
+			var error = {type :'PG_ERROR' , err : err.stack};
+			response.writeHead(200, { 'Content-Type':  'text/plain; charset=UTF-8'});
+			response.write( JSON.stringify( error ) , 'utf8');
+			response.end();
+			return false;
 		}
-		// if requested method does not exist in the model, block request
+
+		// If requested method does not exist in the model, block request
 		if( !pg.models[modelName].hasOwnProperty( methodName) ){
 			return server.throwError(response, 416, 'Method not Found in model  : ' + modelName + '.' + methodName);
 		}
 
 		// get POST data
 		var dataRaw = '';
-		request.on('data', function (data) {
+		request.on('data', async function (data) {
 			dataRaw += data;
 			if(dataRaw.length > server.config.models_request_max_size) {
 				dataRaw = '';
@@ -420,19 +451,19 @@ var server = {
 			}
 		});
 
-		request.on('end', function () {
+		request.on('end', async function () {
 			let methodArgsArray;
 			// Get the POST object
 			methodArgsArray = querystring.parse(dataRaw);
 			// select the appropiate key in POST object
-			methodArgsArray = methodArgsArray[server.config.models_method_args_query] || '[]';
+			methodArgsArray = methodArgsArray[server.config.models_args_query] || '[]';
 			// JSON decode the key contents
 			methodArgsArray = JSON.parse(methodArgsArray);
 			dataRaw = '';
 
 			let modelResponse;
 			try{
-				modelResponse = pg.models[modelName][methodName](...methodArgsArray);
+				modelResponse = await pg.models[modelName][methodName](...methodArgsArray);
 			}catch(err){
 				modelResponse= {type :'PG_ERROR' , err : err.stack};
 			}
@@ -497,21 +528,7 @@ var server = {
 		var regex = RegExp('[' + specials.join('\\') + ']', 'g');
 		// done!
 		return str.replace(regex, '\\$&');
-	},
-	/**
-	 * [isPortTaken description]
-	 * @param  {[type]}  port [description]
-	 * @return {Boolean}      [description]
-	 */
-	isPortAvailable : function(port){
-		return new Promise( (resolve) => {
-			const tester = http.createServer()
-				.once('error', (err) => resolve(err.code||err) )
-				.once('listening', () => tester.once('close', () => resolve(true)).close())
-				.listen(port);
-		});
 	}
-
 };
 
 

@@ -1,8 +1,15 @@
 #!/bin/bash
 clear
-echo "Cheking dependencies..."
+echo "Cheking dependencies for pg-server..."
+cd pg-wrapper
+cd pg-server
+# npm install --loglevel=error
+rm -f package-lock.json
+cd ..
+cd ..
+echo "Cheking dependencies for pg-models..."
 cd pg-models
-npm install --loglevel=error
+# npm install --loglevel=error
 rm -f package-lock.json
 cd ..
 echo "Done. Starting Server..."

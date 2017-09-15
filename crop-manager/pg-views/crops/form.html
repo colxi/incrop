@@ -1,13 +1,13 @@
 <section>
 	<header class="pg-row pg-section-header">
-		<h2 class="pg-col" pg-text="categories.form.title | getProperty categories.form.mode"></h2>
+		<h2 class="pg-col" pg-text="crops.form.title | getProperty crops.form.mode"></h2>
 		<div class="pg-col pg-text-right">
-			<div class="pg-col pg-btn" pg-on-click="categories.list.initialize">Cancel<i class="fa fa-close"></i></div>
+			<div class="pg-col pg-btn" pg-on-click="crops.list.initialize">Cancel<i class="fa fa-close"></i></div>
 		</div>
 	</header>
-	<div class="pg-notification-error pg-notification-bubble" pg-if="categories.form.error" pg-text="categories.form.error"></div>
-	<!-- categories DECLARATION form -->
-	<form pg-element="categories.form.UI.categoryDeclarationForm" pg-show="categories.form.active | === 'categoryDeclarationForm'">
+	<div class="pg-notification-error pg-notification-bubble" pg-if="crops.form.error" pg-text="crops.form.error"></div>
+	<!-- crops DECLARATION form -->
+	<form pg-element="crops.form.UI.categoryDeclarationForm" pg-show="crops.form.active | === 'categoryDeclarationForm'">
 		<div class="pg-row feedAssignationInstructions">
 			<div class="pg-col pg-vertical-center pg-no-gap">
 				<i class="fa fa-info-circle fa-2x"></i>
@@ -19,17 +19,31 @@
 		</div>
 
 		<!-- id -->
-		<input type="text"  hidden pg-value="categories.form.Data.id">
+		<input type="text"  hidden pg-value="crops.form.Data.id">
 		<div class="pg-row">
 			<!-- name -->
 			<label class="pg-col pg-form-control">
-				<input type="text" pg-value="categories.form.Data.name" pg-element="categories.form.UI.categoryName" autofocus required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
+				<input type="text" pg-value="crops.form.Data.name" pg-element="crops.form.UI.categoryName" autofocus required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
+				<span>Name :</span>
+			</label>
+		</div>
+		<div class="pg-row">
+			<!-- Plan -->
+			<label class="pg-col-1_2 pg-form-control">
+				<select pg-value="crops.form.Data.plan" pg-element="crops.form.UI.cropPlan" required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
+				<option pg-each-crop="crops.list.page.items">
+				</select>
+				<span>Plan :</span>
+			</label>
+			<!-- name -->
+			<label class="pg-col-1_2 pg-form-control">
+				<input type="text" pg-value="crops.form.Data.name" pg-element="crops.form.UI.categoryName" autofocus required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
 				<span>Name :</span>
 			</label>
 		</div>
 		<div class="pg-row pg-form-footer">
 			<div class="pg-col">
-				<div class="pg-btn" pg-on-click="categories.form.validate_categoryDeclarationForm">Save Category<i class="fa fa-arrow-right"></i></div>
+				<div class="pg-btn" pg-on-click="crops.form.validate_categoryDeclarationForm">Save Crop<i class="fa fa-arrow-right"></i></div>
 			</div>
 		</div>
 	</form>

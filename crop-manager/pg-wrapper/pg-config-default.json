@@ -1,0 +1,88 @@
+{
+		//
+		//*** DB CONFIG
+		//
+		// NOTE: Some servers would not support HTTPS
+		// Some ports (like 443) can require root privileges to be opened
+		"db_auto_connect" 				: true,
+		"db_host" 						: "localhost",
+		"db_port"						: 3306,
+		"db_user" 						: "root",
+		"db_pwd" 						: "promofone!*", // !!!!!!
+		"db_name"						: "enefty", 	 // !!!!!!
+		// server config
+		"server_protocol" 				: "http", // | "https"
+		"server_port" 					: 80, // | 443
+		"server_address" 				: "192.168.1.200",
+		// client exclusive config
+		"client_load_pg_styles" 		: true,
+		"client_load_fontawesome" 		: true,
+		"client_autobind_document" 		: true,
+		// BASE Paths
+		"baseurl_models"  				: "/pg-models/",
+		"baseUrl_adapters" 				: "/pg-adapters/",
+		"baseUrl_views" 				: "/pg-views/",
+		"baseUrl_modules" 				: "/pg-wonders/modules/",
+		//
+		// *** ADAPTERS CONFIG
+		"adapters_constructor" 			: "pg_constructor",
+ 		//
+		// *** MODELS CONFIG
+		//
+		// you can disable Cache on development enviroments (prevents the need
+		// of reboot server after changes in models code )
+		"models_use_cache" 				: false,
+		"models_request_max_size" 		: 500,
+		// Variable Name, holding the required Merhod in URL, for METHOD CALLs.
+		"models_method_query" 			: "method",
+		// Variable Name, holding the Args in the POST data, for METHOD calls.
+		"models_args_query" 		: "args",
+		//
+		// ** HTTP SERVER CONFIG
+		//
+		// when requested a directory but not provided a file to open from it
+		// will redirect to the default index filename
+		"defaultDirectoryIndex" 		: "index.html",
+		// CORS : Cross Origin Resource Sharing.
+		// Warning! Certain configurations could drive the Client (Browser) to
+		// preflight the request, changing the request method to "OPTIONS".
+		// That would make any MODEL EXECUTION call, FAIL (expects POST request)
+		"cross_origin_allow_requests"   : true,
+		"cross_origin_allow_origin" 	: "*",
+		"cross_origin_allow_methods" 	: "GET,POST,OPTIONS,PUT,PATCH,DELETE,HEAD",
+		"cross_origin_allow_headers" 	: "Content-type",
+		"cross_origin_allow_credentials": false,
+		// SLL Certificates paths. If needed, new selfsigned certificates can be
+		// generated using the ./pg-wonders/pg-certificates/generate.sh script
+		"ssl_private_key_uri" 			: "/pg-wrapper/pg-server/certificates/server.key",
+		"ssl_certificate_uri" 			: "/pg-wrapper/pg-server/certificates/server.crt",
+		// Declare "Foridden directives" inside the Array, to block the targeted
+		// URIs LOADING, using String or Regular Expressions.
+		// Specs :
+		// - String Directives with a "/" character in their begining , will be
+		// considered Absolute paths (to be blocked as their children chain).
+		// - String Entries that don"t begin with a slash would activate the directive
+		// in those URI request where the String could be located in any position.
+		// eg:
+		// "/pg-wrapper/pg-certificates/
+		// ---> Would Block any "FILE REQUEST" pointing to that directory, or any
+		// content inside (and inside the nested directories and files).
+		// ".sql"
+		// ---> Would Block any "FILE REQUEST" where the substring ".sql" could be
+		// found in the URI
+		//
+		// Regular Expression Directives, are aplied as provided, testing them
+		// against the URI string. When the regExp.test succeeds positivelly, the
+		// request is BLOCKED.
+		//
+		"forbidden_uri" : [
+			"sftp-settings.json" 	// security filter blocks Sublime ftp config
+			// "/node_modules/",	// blocks requests to root node_modules dir
+			// "node_modules/", 	// blocks requests to any dir that ends in node_modules/
+			// /\/node_modules\//   // blocks requests to any folder called node_modules
+		],
+		//
+		// define date format using the most apropiate locale.
+		// Example : es-ES European (dd-MM-YYYY HH:mm:ss) , en-US American (YYYY-MM-dd hh:mm:ss AM|PM)
+		"date_locale" 					: "es-ES"
+	}

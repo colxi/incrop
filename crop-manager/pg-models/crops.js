@@ -1,18 +1,9 @@
 /* global  pg, server */
 
 
-let categories = {
-	test: function(a,b){
-		console.log("tttest");
-		return a+b;
-	},
-
-	page( page = 0 , limit=10, sortBy = '' , order='DESC' ){
-		// get all items (clone array)
-		//let items = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,34,542,524,524,524,624,63636,36,36,53673,735,];
-		//JSON.parse( JSON.stringify(pg.models.storage.Data.categories) );
-
-		let items = server.Database.query('SELECT * in crops');
+module.exports = {
+	page : async function( page = 0 , limit=10, sortBy = '' , order='DESC' ){
+		let items = await server.Database.query('SELECT * FROM crops');
 
 		// TO DO : sort by key
 		// TO DO : apply ASC DESC order
@@ -27,9 +18,14 @@ let categories = {
 		return items;
 	},
 
-	get(id='',original = false){
-		let i = crops.getIndexById(id);
-		return (i === -1) ? -1 :  ( original ? pg.models.storage.Data.crops[i] : JSON.parse( JSON.stringify(pg.models.storage.Data.crops[i]) ) );
+	count : async function(){
+		let items = await this.page(0);
+		return items.length;
+	},
+
+	get : async function(id = ''){
+		let crop = await server.Database.query('SELECT * FROM crops WHERE id= ?',[id]);
+		return crop[0];
 	},
 
 	getByName(name){
@@ -40,10 +36,10 @@ let categories = {
 	},
 
 	delete(id=''){
-		return new Promise(function(resolve){
+		return new Promise( resolve=> {
 			console.log('[Model]:crops.delete(): deleting feed #'+id);
 			// get index in array
-			let i = crops.getIndexById(id);
+			let i = this.getIndexById(id);
 			// block if  id NOT found
 			if(i === -1) resolve(false);
 			// remove item from Data array
@@ -56,10 +52,10 @@ let categories = {
 	save( crop ){
 		return new Promise(function(resolve){
 			console.log('[Model]:crops.save(): saving crop #' + crop.id);
-			let i = crops.getIndexById(crop.id);
+			let i = this.getIndexById(crop.id);
 			if(i === -1) i = pg.models.storage.Data.crops.length;
 			pg.models.storage.Data.crops[i] = crop;
-			crops.updateFeedCount();
+			this.updateFeedCount();
 			pg.models.storage.sync.categories().then( r => resolve(true) );
 		});
 	},
@@ -74,7 +70,7 @@ let categories = {
 
 	updateFeedCount(id=undefined){
 		let _update = function(id){
-			let crop = crops.get(id);
+			let crop = this.get(id);
 			if(crop === -1) return -1;
 
 			crop.feeds = 0;
@@ -92,4 +88,3 @@ let categories = {
 	},
 };
 
-module.exports = categories;
