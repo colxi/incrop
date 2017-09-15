@@ -1,2 +1,2 @@
 # incrop
-Arduino&amp;Node Crop manager
+Arduino&amp;Node Croppy 
