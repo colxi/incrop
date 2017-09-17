@@ -131,7 +131,7 @@ var crops = {
 				return false;
 			}
 			// show loader
-			pg.loader(crops.form.UI.categoryDeclarationForm).show();
+			pg.Loader(crops.form.UI.categoryDeclarationForm).show();
 			//
 			// validation : duplicated name
 			//
@@ -141,7 +141,7 @@ var crops = {
 					pg.log('crops.form.validate_categoryDeclarationForm(): Name validation failed...');
 					crops.form.error = 'Category name already exist.';
 					crops.form.UI.categoryName.setCustomValidity('Category name already exist.');
-					pg.loader(crops.form.UI.categoryDeclarationForm).hide();
+					pg.Loader(crops.form.UI.categoryDeclarationForm).hide();
 					return false;
 				}
 			}
@@ -152,7 +152,7 @@ var crops = {
 				count: 0
 			}).then(function(r) {
 				//  hide loader
-				pg.loader(crops.form.UI.categoryDeclarationForm).hide();
+				pg.Loader(crops.form.UI.categoryDeclarationForm).hide();
 				// DONE! display ending message!
 				crops.location = 'crops/form_completed';
 			});

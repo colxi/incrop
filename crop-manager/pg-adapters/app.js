@@ -2,7 +2,7 @@
 * @Author: colxi.kl
 * @Date:   2017-08-28 06:02:49
 * @Last Modified by:   colxi.kl
-* @Last Modified time: 2017-09-15 00:27:40
+* @Last Modified time: 2017-09-15 03:41:29
 */
 /* global pg */
 
@@ -13,7 +13,7 @@ let app ={
 		pg.log('app.__constructor(): Application Controller Initialization started.');
 		pg.log('app.__constructor(): Importing App Modules & dependencies...');
 		// load some required pg modules
-		pg.load.css('styles.css');
+		pg.include('/pg-wonders/styles/styles.css');
 
 		let formValidation = await pg.require('form-validation.js');
 			//.then( r => pg.load.model('storage' , 'feedContents') )

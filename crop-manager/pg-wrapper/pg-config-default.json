@@ -18,6 +18,9 @@
 		"client_load_pg_styles" 		: true,
 		"client_load_fontawesome" 		: true,
 		"client_autobind_document" 		: true,
+		"client_load_pg_plugins" 		: [
+											"pg-dom-utils.js"
+										  ],
 		// BASE Paths
 		"baseurl_models"  				: "/pg-models/",
 		"baseUrl_adapters" 				: "/pg-adapters/",
@@ -36,7 +39,7 @@
 		// Variable Name, holding the required Merhod in URL, for METHOD CALLs.
 		"models_method_query" 			: "method",
 		// Variable Name, holding the Args in the POST data, for METHOD calls.
-		"models_args_query" 		: "args",
+		"models_args_query" 			: "args",
 		//
 		// ** HTTP SERVER CONFIG
 		//
@@ -83,6 +86,6 @@
 		],
 		//
 		// define date format using the most apropiate locale.
-		// Example : es-ES European (dd-MM-YYYY HH:mm:ss) , en-US American (YYYY-MM-dd hh:mm:ss AM|PM)
+		// Example : es-ES (dd-MM-YYYY HH:mm:ss) , en-US (YYYY-MM-dd hh:mm:ss AM|PM)
 		"date_locale" 					: "es-ES"
 	}
