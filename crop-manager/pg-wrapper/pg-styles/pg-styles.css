@@ -305,10 +305,16 @@ table {
 .pg-row .pg-col-100 {
   width: 100%;
 }
-/* line 109, ../../src/styles/pg-partials/_columnization.scss */
+
 .pg-row .pg-col {
   flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
 }
+.pg-row .pg-col-auto{
+  flex-grow: 1;
+}
+
 /* line 110, ../../src/styles/pg-partials/_columnization.scss */
 .pg-row .pg-col-x1 {
   flex-grow: 1;
@@ -1547,4 +1553,49 @@ h6 {
 /* line 144, ../../src/styles/pg-styles.scss */
 #new_feed_form > div {
   margin-bottom: 10px;
+}
+
+
+/* DATEPICKER */
+#pg-datepicker-wrapper{
+    position: absolute;
+    width: 100%;
+    top: 15%;
+    background: #424242;
+    color: white;
+    padding: 30px;
+}
+#pg-datepicker-wrapper .pg-row.pg-datepicker-week span {
+    padding-bottom: 10px;
+    padding-top: 10px;
+    cursor: pointer;
+}
+
+/* MODAL */
+#pg-modal-wrapper {
+  position: absolute;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    bottom: 0;
+}
+
+#pg-modal-wrapper > .pg-modal-curtain{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    background: rgba(255, 0, 0, 0.3);
+    left: 0;
+    right: 0;
+    display: block;
+    z-index: 99998;
+}
+
+#pg-modal-wrapper > .pg-modal{
+    position: absolute;
+    background: red;
+    min-height: 10px;
+    width: 100%;
+    margin-left: 0px;
+    z-index: 99999;
 }

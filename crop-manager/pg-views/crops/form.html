@@ -9,10 +9,10 @@
 	<!-- crops DECLARATION form -->
 	<form pg-element="crops.form.UI.categoryDeclarationForm" pg-show="crops.form.active | === 'categoryDeclarationForm'">
 		<div class="pg-row feedAssignationInstructions">
-			<div class="pg-col pg-vertical-center pg-no-gap">
+			<div class="pg-col-15 pg-vertical-center pg-no-gap">
 				<i class="fa fa-info-circle fa-2x"></i>
 			</div>
-			<div class="pg-col">
+			<div class="pg-col-85">
 				<div class="pg-text-bolder">Keep your feeds and watchers organized...</div>
 				<div class="pg-text-small">Categories allow you to get more accurate results.</div>
 			</div>
@@ -28,17 +28,28 @@
 			</label>
 		</div>
 		<div class="pg-row">
-			<!-- Plan -->
+			<!-- Type -->
 			<label class="pg-col-1_2 pg-form-control">
-				<select pg-value="crops.form.Data.plan" pg-element="crops.form.UI.cropPlan" required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
-				<option pg-each-crop="crops.list.page.items">
+				<select pg-value="crops.form.Data.type" pg-element="crops.form.UI.type" required pg-pattern="{app.regExp.notEmpty}">
+					<option value="" selected="selected" disabled>---</option>
+					<option pg-each-crop="crops.form.Data.crop_types" pg-value="crop_type.id" >{crop_type.name}</option>
 				</select>
-				<span>Plan :</span>
+				<span>Crop Type :</span>
 			</label>
 			<!-- name -->
 			<label class="pg-col-1_2 pg-form-control">
-				<input type="text" pg-value="crops.form.Data.name" pg-element="crops.form.UI.categoryName" autofocus required pg-pattern="{app.regExp.notEmpty}" placeholder="eg. CreativeCommons Music">
-				<span>Name :</span>
+				<input type="text" pg-datepicker="crops.form.datepickerConfig" pg-value="crops.form.Data.date_start" pg-element="crops.form.UI.dateStart" required readonly pg-pattern="{app.regExp.notEmpty}" placeholder="dd-mm-yyy">
+				<span>Date Start :</span>
+			</label>
+		</div>
+		<div class="pg-row">
+			<!-- Plan -->
+			<label class="pg-col-1_2 pg-form-control">
+				<select pg-value="crops.form.Data.crop_plan" pg-element="crops.form.UI.cropPlan" required pg-pattern="{app.regExp.notEmpty}" >
+					<option value="" selected="selected" disabled>---</option>
+					<option pg-each-plan="crops.form.Data.plans" pg-value="plan.id" >{plan.name}</option>
+				</select>
+				<span>Plan :</span>
 			</label>
 		</div>
 		<div class="pg-row pg-form-footer">

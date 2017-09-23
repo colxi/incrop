@@ -60,6 +60,8 @@ let pg = (function(){
 		// inject PLUGINS to collection
 		return extendCollectionMethods(collection);
 	};
+
+	_pg.adapters = null;
 	/**
 	 *
 	 * pg.config{} : 	Stores PG configuration. Base config comes from
@@ -113,15 +115,17 @@ let pg = (function(){
 			pg.log( 'pg.init() : Configuration Object (pg.config)' , pg.config );
 
 			// System js (import modules from the future)
-			await pg.include('/pg-wrapper/pg-includes/system.js', 'SystemJS...');
+			await pg.include('/pg-wrapper/pg-includes/system.js');
 			/* Sightglass ... data binding */
-			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-sightglass.js', 'Sightglass...');
+			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-sightglass.js');
 			/* Rivers data binding....*/
-			await pg.include('/pg-wrapper/pg-includes/rivets/rivets.js', 'Rivets...');
+			await pg.include('/pg-wrapper/pg-includes/rivets/rivets.js');
 			/* rivets expansion */
-			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-stdlib.js', 'Rivets Formaters Lib...') ;
+			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-stdlib.js') ;
 			/* rivets Adapters and views importer */
-			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-import.js', 'Rivets Adapters Importer Lib...');
+			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-import.js');
+			// Rivets datepicker
+			await pg.include('/pg-wrapper/pg-includes/rivets/rivets-datepicker.js');
 			/* modules configurations  */
 			pg.log('pg.initialize() : Configure Rivets & Rivets Adapters Importer...');
 			System.config({ baseURL: '/' });
@@ -143,6 +147,8 @@ let pg = (function(){
 			pg.log('pg.initialize() : Integrate Binder in Pomegranade...');
 			sightglass.adapters = rivets.adapters;
 			sightglass.root 	= rivets.rootInterface;
+
+			pg.adapters = rivets.imports;
 			/* Load DEFAULT styles */
 			if(pg.config.client_load_pg_styles){
 				pg.log('pg.initialize() : Loading Pomegranade defaults CSS...');
@@ -338,6 +344,21 @@ let pg = (function(){
 			return true;
 		}
 	};
+	/**
+	 * [modal description]
+	 * @return {[type]} [description]
+	 */
+	_pg.modal = async function( content , type){
+		if( !document.getElementById('#pg-modal-wrapper') ){
+			let modal_html = '<div class="pg-modal-curtain"></div> <div class="pg-col pg-modal"></div>';
+			var wrapper = document.createElement('div') ;
+			wrapper.id = 'pg-modal-wrapper';
+			wrapper.className = 'pg-row';
+			wrapper.innerHTML = modal_html;
+			document.body.appendChild( wrapper );
+		}
+
+	},
 	/**
 	 *
 	 * pg.models[model][method]() 	(async) Virtual object that handles calls

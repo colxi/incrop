@@ -89,6 +89,7 @@ var crops = {
 			cropPlan : null
 		},
 
+	datepickerConfig : { /* configuracion de datepickr */ },
 		Data: {},
 
 		initialize: async function(id = 'new') {
@@ -104,6 +105,7 @@ var crops = {
 				crops.form.Data = crop;
 			}
 
+			crops.form.Data.plans = await pg.models.plans.page(0);
 			// !!! crops.form.Data.plans = pg.models.;
 
 			crops.form.error = false;

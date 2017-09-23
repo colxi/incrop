@@ -84,6 +84,15 @@
 
 .pg-row{
     .pg-col-collapsed{ width    : 0px !important; opacity:0; }
+    .pg-col{
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0;
+    }
+    .pg-col-auto{
+        flex-grow: 1;
+    }
+
     .pg-col-5{ width: 5%; }
     .pg-col-10{ width: 10%; }
     .pg-col-15{ width: 15%; }
@@ -106,7 +115,7 @@
     .pg-col-95{ width: 95%; }
     .pg-col-100{ width: 100%; }
 
-    .pg-col{     flex-grow: 1; }
+
     .pg-col-x1{  flex-grow: 1; }
     .pg-col-x2{  flex-grow: 2; }
     .pg-col-x3{  flex-grow: 3; }

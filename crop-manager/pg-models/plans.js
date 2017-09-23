@@ -1,9 +1,9 @@
 /* global  pg, server */
-const moment = require('moment');
+
 
 module.exports = {
 	page : async function( page = 0 , limit=10, sortBy = '' , order='DESC' ){
-		let items = await server.Database.query('SELECT * FROM crops');
+		let items = await server.Database.query('SELECT * FROM crop_plans');
 
 		// TO DO : sort by key
 		// TO DO : apply ASC DESC order
@@ -13,10 +13,6 @@ module.exports = {
 			let firstIndex = (page * limit) - limit;
 			let lastIndex = (firstIndex + limit - 1) < items.length ? (firstIndex + limit ) : items.length ;
 			items = items.slice(firstIndex, lastIndex);
-		}
-		// format dates
-		for(let i=0;i<items.length;i++){
-			items[i].date_start = moment(items[i].date_start).format('DD-MM-YYYY');
 		}
 		// done ! return items;
 		return items;
@@ -29,7 +25,6 @@ module.exports = {
 
 	get : async function(id = ''){
 		let crop = await server.Database.query('SELECT * FROM crops WHERE id= ?',[id]);
-		crop[0].date_start = moment(crop[0].date_start).format('DD-MM-YYYY');
 		return crop[0];
 	},
 

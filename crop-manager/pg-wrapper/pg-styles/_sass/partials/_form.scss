@@ -226,3 +226,19 @@ input[type=range]::-ms-fill-upper {
   border-radius: 2.6px;
 }
 input[type=range]:focus::-ms-fill-upper { background: $c-secondary-main; }
+
+
+/* DATEPICKER */
+#pg-datepicker-wrapper{
+    position: absolute;
+    width: 100%;
+    top: 15%;
+    background: #424242;
+    color: white;
+    padding: 30px;
+}
+#pg-datepicker-wrapper .pg-row.pg-datepicker-week span {
+    padding-bottom: 10px;
+    padding-top: 10px;
+    cursor: pointer;
+}
